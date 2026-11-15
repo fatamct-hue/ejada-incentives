@@ -3,6 +3,7 @@ import { sb, configured } from './supabase'
 import { Provider, useApp, ROLES, asset } from './lib'
 import Icon from './Icon'
 import Home from './screens/Home'
+import MyHome from './screens/MyHome'
 import DG from './screens/DG'
 import Form from './screens/Form'
 import Innovator from './screens/Innovator'
@@ -15,7 +16,7 @@ import Settings from './screens/Settings'
 
 const NAV = [
   ['home', 'الرئيسية', ['dg', 'ejada', 'dev', 'admin_fin'], 'home'],
-  ['dg', 'تقسيمي', ['dg'], 'unit'],
+  ['dg', 'ترشيحاتي', ['dg'], 'unit'],
   ['service', 'استمارة خدمة المستفيدين', ['dg'], 'service'],
   ['initiator', 'استمارة المبادر', ['dg'], 'spark'],
   ['dash', 'الداشبورد', ['ejada', 'dev', 'admin_fin'], 'dash'],
@@ -63,7 +64,7 @@ function Shell() {
   const nav = NAV.filter((n) => n[2].includes(me.role))
   const go = (p) => { location.hash = p; setOpen(false) }
   const cur = nav.find((n) => n[0] === page) || nav[0]
-  const S = { home: Home, dg: DG, service: Form, initiator: Form, innovator: Innovator, dash: Dashboard, review: Review, budget: Budget, cycles: Cycles, reports: Reports, settings: Settings }[cur[0]]
+  const S = { home: me.role === 'dg' ? MyHome : Home, dg: DG, service: Form, initiator: Form, innovator: Innovator, dash: Dashboard, review: Review, budget: Budget, cycles: Cycles, reports: Reports, settings: Settings }[cur[0]]
   return <div className="app">
     <aside className={`side ${open ? 'open' : ''}`}>
       <img src={asset('brand/logo-horizontal-white.png')} alt="وزارة الإسكان والتخطيط العمراني" style={{ width: '100%' }} />
