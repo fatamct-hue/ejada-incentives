@@ -68,6 +68,8 @@ function Shell() {
       <nav className="nav">{nav.map(([k, l]) => <a key={k} href={'#' + k} className={cur[0] === k ? 'on' : ''} onClick={() => setOpen(false)}>{l}</a>)}</nav>
       <div className="role"><label>{ROLES[me.role]}</label><b>{me.full_name}</b>
         <button className="btn o s" style={{ marginTop: 8 }} onClick={() => sb.auth.signOut()}>تسجيل الخروج</button></div>
+      {import.meta.env.VITE_DEMO === '1' && <div className="role"><label>معاينة بالأدوار (بيانات وهمية)</label>
+        {[['ejada', 'فريق الإجادة'], ['dg', 'مدير عام'], ['dev', 'التطوير والدراسات'], ['fin', 'الشؤون المالية']].map(([r, l]) => <a key={r} href={'?role=' + r + location.hash} style={{ display: 'block', color: '#4ad6ed', padding: '3px 0' }}>{l}</a>)}</div>}
       <div style={{ flex: 1 }} />
       <img src={asset('brand/ejada-logo-white.png')} alt="إجادة" style={{ width: 120, alignSelf: 'flex-start', opacity: .9 }} />
       <img src={asset('brand/slogan-2line-white.png')} alt="نتقدّم بثقة، وبالثقة" style={{ width: 150 }} />
