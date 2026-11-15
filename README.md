@@ -1,23 +1,44 @@
 # منصة حوافز الإجادة المؤسسية
 
-وزارة الإسكان والتخطيط العمراني — فريق الإجادة المؤسسية في وزارة الإسكان والتخطيط العمراني.
+وزارة الإسكان والتخطيط العمراني — سلطنة عُمان. يديرها فريق الإجادة المؤسسية.
 
-## مكونات المستودع
-- `index.html` و`app.js` و`app.css`: واجهة المنصة (تُنشر على GitHub Pages).
-- `supabase/schema.sql`: قاعدة البيانات، والصلاحيات وعزل بيانات كل تقسيم على الخادم، وقواعد المنع.
-- `vendor/`: مكتبتا Supabase وExcel.
-- `brand/`: ضع فيه ملفات الشعار.
-- `PROMPT.md` و`reference/`: المواصفات والمعاينة المعتمدة.
+- `PROMPT.md` المواصفات، و`reference/` المعاينة المعتمدة.
+- `supabase/migrations/` المخطط والدوال وRLS (001، 002، 003). `supabase/demo/` بيانات تجريبية قابلة للحذف. `supabase/tests/` اختبارات القواعد.
+- الواجهة: Vite + React، من جذر المستودع.
 
-## التشغيل لأول مرة
-1. **Supabase ← SQL Editor ← New query**: الصق محتوى `supabase/schema.sql` كاملاً، ثم **Run**. تظهر في النتيجة رسالة فيها «رمز تفعيل حساب فريق الإجادة».
-2. **Supabase ← Authentication ← Sign In / Providers ← Email**: أوقف **Confirm email**، ثم **Save**.
-3. افتح رابط المنصة، واختر «تفعيل حساب جديد»، وأدخل بريدك وكلمة مرور ورمز التفعيل.
-4. من «الإعدادات»: أدخل العدد المعتمد للموظفين وأعداد التقسيمات، وأضف المستخدمين، وأرسل لكل مستخدم رمز التفعيل الخاص به.
+## التشغيل
+1. أنشئ مشروع Supabase، ونفّذ `001_schema.sql` ثم `002_functions_rls.sql` في SQL Editor.
+2. Authentication ← Providers ← Email: فعّل الرمز/الرابط (OTP) وعطّل التسجيل الذاتي (Disable sign ups).
+3. أضف أول مستخدم (فريق الإجادة) من SQL Editor، ثم ادخل وأضف الباقين من الإعدادات:
+   `insert into profiles(email,full_name,role) values ('name@gov.om','الاسم','ejada');`
+   ثم أنشئ المستخدم في Authentication ← Users بنفس البريد (أو اترك الدخول بالرمز يرسل له).
+   ملاحظة: مع تعطيل التسجيل الذاتي يجب إنشاء المستخدم في Auth يدوياً مرة واحدة (Invite user) لكل بريد.
+4. GitHub: Settings ← Pages ← Source: GitHub Actions. النشر يتم عند الدفع إلى `main` (رابط المشروع والمفتاح العام مضبوطان في `deploy.yml`).
+5. الخطوط الرسمية (Zarid وManchette): ضع ملفات woff2 في `public/fonts/` بالأسماء الموجودة في `src/styles.css`.
+6. تشغيل محلي: `cp .env.example .env` ثم `npm i && npm run dev`.
+
+## إضافة المستخدمين
+الإعدادات ← المستخدمون ← إضافة (الاسم، البريد، الدور، التقسيم للمدير العام). مدير عام واحد لكل تقسيم.
+ثم Invite user للبريد نفسه من لوحة Supabase.
 
 ## النسخ الاحتياطي
-من Supabase ← Database ← Backups (يومي تلقائياً في الخطة المجانية لفترة محدودة)، أو من Table Editor ← Export to CSV لكل جدول.
+`pg_dump "postgresql://postgres:<password>@db.<ref>.supabase.co:5432/postgres" -Fc -f backup.dump`
+(لوحة Supabase تحفظ نسخاً يومية في الخطط المدفوعة). الشواهد: Storage ← bucket `evidence` تُنسخ بـ `supabase storage` CLI أو من اللوحة.
 
-## النقل لاحقاً إلى خوادم الوزارة
-- قاعدة البيانات: ملف `supabase/schema.sql` يعمل على أي Supabase (سحابي أو مستضاف ذاتياً).
-- الواجهة: ملفات ثابتة تُرفع إلى أي خادم ويب، مع تعديل `SB_URL` و`SB_KEY` في أول `app.js`.
+## النقل إلى خوادم الوزارة
+المخطط كله في SQL. على Supabase مستضاف ذاتياً أو PostgreSQL + GoTrue + Storage: نفّذ ملفات migrations بالترتيب، واستعد النسخة بـ `pg_restore`، ثم غيّر `VITE_SUPABASE_URL` وأعد البناء.
+
+## المطلوب من الموارد البشرية وتقنية المعلومات
+- سجل الموظفين (الرقم الوظيفي، الاسم، المسمى، التقسيم) Excel.
+- هيكل التقسيمات وأعداد موظفيها والتبعية والتاريخ المرجعي، والعدد الإجمالي المعتمد.
+- قائمة المديرين العامين وبريد كل منهم، وبريد فريق الإجادة والتطوير والدراسات والشؤون المالية.
+
+## البيانات التجريبية
+`supabase/demo/load_demo.sql` للتحميل، و`unload_demo.sql` للحذف بأمر واحد.
+
+## الاختبارات
+```
+psql -f supabase/tests/00_mock_supabase.sql; psql -f supabase/migrations/001_schema.sql; psql -f supabase/migrations/002_functions_rls.sql
+psql -f supabase/tests/01_rules.sql; psql -f supabase/tests/02_workflow.sql
+```
+(على قاعدة محلية فارغة؛ الملف 00 يحاكي Supabase للاختبار فقط.)
