@@ -17,6 +17,7 @@ language plpgsql stable security definer set search_path = public as $$
 declare
   ys year_settings; svc_n int; remaining_b bigint; inc_hc bigint; assigned bigint := 0; left_b bigint;
 begin
+  if my_role() is null then return; end if;
   select * into ys from year_settings where year = p_year;
   if ys.approved_headcount is null then return; end if;
   select count(*) into svc_n from divisions where is_service and active;
@@ -402,5 +403,5 @@ create policy ev_obj_del on storage.objects for delete using (bucket_id = 'evide
   select 1 from public.nominations n where n.id::text = (storage.foldername(name))[2]
    and n.division_id = public.my_division() and n.status in ('draft','needs_info')));
 
+revoke execute on all functions in schema public from public, anon;
 grant execute on all functions in schema public to authenticated;
-revoke execute on all functions in schema public from anon;

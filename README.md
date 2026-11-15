@@ -3,7 +3,7 @@
 وزارة الإسكان والتخطيط العمراني — سلطنة عُمان. يديرها فريق الإجادة المؤسسية.
 
 - `PROMPT.md` المواصفات، و`reference/` المعاينة المعتمدة.
-- `supabase/migrations/` المخطط والدوال وRLS (001، 002). `supabase/demo/` بيانات تجريبية قابلة للحذف. `supabase/tests/` اختبارات القواعد.
+- `supabase/migrations/` المخطط والدوال وRLS (001، 002، 003). `supabase/demo/` بيانات تجريبية قابلة للحذف. `supabase/tests/` اختبارات القواعد.
 - الواجهة: Vite + React، من جذر المستودع.
 
 ## التشغيل
@@ -13,7 +13,7 @@
    `insert into profiles(email,full_name,role) values ('name@gov.om','الاسم','ejada');`
    ثم أنشئ المستخدم في Authentication ← Users بنفس البريد (أو اترك الدخول بالرمز يرسل له).
    ملاحظة: مع تعطيل التسجيل الذاتي يجب إنشاء المستخدم في Auth يدوياً مرة واحدة (Invite user) لكل بريد.
-4. في GitHub: Settings ← Secrets ← Actions: أضف `VITE_SUPABASE_URL` و`VITE_SUPABASE_ANON_KEY`. ثم Settings ← Pages ← Source: GitHub Actions. النشر يتم عند الدفع إلى `main`.
+4. GitHub: Settings ← Pages ← Source: GitHub Actions. النشر يتم عند الدفع إلى `main` (رابط المشروع والمفتاح العام مضبوطان في `deploy.yml`).
 5. الخطوط الرسمية (Zarid وManchette): ضع ملفات woff2 في `public/fonts/` بالأسماء الموجودة في `src/styles.css`.
 6. تشغيل محلي: `cp .env.example .env` ثم `npm i && npm run dev`.
 
