@@ -345,3 +345,11 @@ tr:hover td{background:rgba(255,255,255,.5)}
 .yb:hover{transform:translateY(-3px)}.yb.on{border-color:var(--teal);background:#fff;box-shadow:0 8px 20px rgba(0,130,122,.18)}
 .yb b{display:block;font-size:22px}.yb span{font-size:12px;color:#5d7383}
 .ring{width:110px;height:110px;flex:none}.ring circle{fill:none;stroke-width:12;transform:rotate(-90deg);transform-origin:50% 50%;stroke-linecap:round}
+
+/* مقياس النجوم (5 نجوم = 10 نقاط) */
+.stars{display:flex;gap:8px;justify-content:flex-start}
+.star{border:0;background:none;padding:2px;cursor:pointer;line-height:0;transition:transform .2s var(--ease)}
+.star svg{fill:rgba(0,37,62,.06);stroke:rgba(0,37,62,.25);stroke-width:1.4;transition:fill .25s,stroke .25s,filter .25s}
+.star:hover{transform:translateY(-3px) scale(1.12)}
+.star.on svg{fill:var(--sc);stroke:var(--sc);filter:drop-shadow(0 4px 8px color-mix(in srgb,var(--sc) 55%,transparent));animation:pop .3s var(--ease) both;animation-delay:calc(var(--i)*40ms)}
+@media (max-width:560px){.star svg{width:44px;height:44px}.stars{justify-content:space-between}}

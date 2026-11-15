@@ -8,10 +8,13 @@ const SC = ['#e4c6ac', '#dcb89c', '#d2a98b', '#9fb4c6', '#7f9fbb', '#5f8cb0', '#
 const rating = (v, max = 10) => { const r = v / max; return r >= 0.95 ? ['ممتاز', '#43b987'] : r >= 0.8 ? ['جيد جداً', '#00a393'] : r >= 0.6 ? ['جيد', '#5f8cb0'] : r >= 0.4 ? ['مقبول', '#9fb4c6'] : ['ضعيف', '#c79a7f'] }
 const GCOL = ['#006452', '#0f446c', '#aa7f67', '#00827a']
 const GICON = [['service', 'service'], ['initiator', 'spark']]
+const STAR_COL = ['#d2a98b', '#9fb4c6', '#5f8cb0', '#00a393', '#43b987']
 function Scale({ value, max, onChange }) {
-  return <div className="scale" role="radiogroup">{Array.from({ length: max }, (_, i) => i + 1).map((n) => {
-    const on = value >= n; const c = SC[Math.round((n / max) * 10) - 1]
-    return <button type="button" key={n} className={`${on ? 'on' : ''} ${value === n ? 'cur' : ''}`} style={{ '--sc': c }} onClick={() => onChange(value === n ? undefined : n)} aria-label={`${n}`}>{n}</button> })}</div>
+  const step = max / 5; const stars = Math.round(value / step)
+  return <div className="stars" role="radiogroup">{[1, 2, 3, 4, 5].map((n) => {
+    const on = stars >= n; const c = STAR_COL[Math.max(0, stars - 1)]
+    return <button type="button" key={n} className={`star ${on ? 'on' : ''}`} style={{ '--sc': c, '--i': n }} onClick={() => onChange(stars === n ? undefined : n * step)} aria-label={`${n} من 5`}>
+      <svg viewBox="0 0 24 24" width="34" height="34"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.3 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z" strokeLinejoin="round" /></svg></button> })}</div>
 }
 function Gauge({ total }) {
   const R = 86, C = Math.PI * R; const len = (Math.min(100, total) / 100) * C; const [t, c] = rating(total, 100)
@@ -94,7 +97,7 @@ export default function Form({ track, go }) {
         <div className="gbar"><i style={{ width: `${(gs / gmax) * 100}%` }} /></div>
         {cs.map((c) => { const v = f.scores[c.id]; const [rt, rc] = v ? rating(v, c.max_score) : ['', '#9aa7ae']
           return <div className="crt" key={c.id}>
-            <div className="crt-top"><span>{c.label}</span><span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{v ? <span className="rate" style={{ '--rc': rc }}>{rt}</span> : null}<b className="num" dir="ltr">{v ?? '—'}<small className="muted"> / {c.max_score}</small></b></span></div>
+            <div className="crt-top"><span>{c.label}</span><span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{v ? <span className="rate" style={{ '--rc': rc }}>{rt}</span> : null}<b className="num" dir="ltr">{v ? Math.round(v / (c.max_score / 5)) : '—'}<small className="muted"> / 5</small></b></span></div>
             <Scale value={v || 0} max={c.max_score} onChange={(n) => setF((x) => ({ ...x, scores: { ...x.scores, [c.id]: n } }))} />
             <button type="button" className="evb" onClick={() => setEvOpen((o) => ({ ...o, [c.id]: !o[c.id] }))}><Icon n={evOpen[c.id] || f.evidence_notes[c.id] ? 'check' : 'plus'} size={14} />الدليل والأمثلة (اختياري)</button>
             {(evOpen[c.id] || f.evidence_notes[c.id]) && <input className="evi" placeholder="اكتب الدليل أو المثال" value={f.evidence_notes[c.id] || ''} onChange={(e) => setF((x) => ({ ...x, evidence_notes: { ...x.evidence_notes, [c.id]: e.target.value } }))} />}
