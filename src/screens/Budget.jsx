@@ -14,7 +14,7 @@ export default function Budget() {
     {me.role === 'ejada' && ys?.approved_headcount && hcSum !== ys.approved_headcount &&
       <div className="alert w" style={{ marginBottom: 12 }}>مجموع موظفي التقسيمات ({hcSum}) يختلف عن العدد الإجمالي المعتمد ({ys.approved_headcount}).</div>}
     {!ys?.approved_headcount && <div className="alert i">لم يُدخل العدد الإجمالي المعتمد للموظفين لهذه السنة بعد (من الإعدادات).</div>}
-    {me.role !== 'dg' && <div className="grid g4"><Kpi l="إجمالي المخصصات" v={fmt(sum('allocation'))} /><Kpi l="المعتمد" v={fmt(sum('q1') + sum('q2') + sum('q3') + sum('q4'))} /><Kpi l="المصروف" v={fmt(sum('paid'))} /><Kpi l="الرصيد" v={fmt(sum('balance'))} /></div>}
+    {me.role !== 'dg' && <div className="grid g4 stg"><Kpi i={0} icon="coin" l="إجمالي المخصصات" v={fmt(sum('allocation'))} /><Kpi i={1} icon="check" c="#43b987" l="المعتمد" v={fmt(sum('q1') + sum('q2') + sum('q3') + sum('q4'))} /><Kpi i={2} icon="download" c="#aa7f67" l="المصروف" v={fmt(sum('paid'))} /><Kpi i={3} icon="shield" c="#0f446c" l="الرصيد" v={fmt(sum('balance'))} /></div>}
     <Sec t="مخصصات المبادر"><button className="btn o s" onClick={exp}>تصدير Excel</button></Sec>
     <div className="card tw"><table><thead><tr><th>التقسيم</th><th>الموظفون</th><th>المخصص</th><th>ر1</th><th>ر2</th><th>ر3</th><th>ر4</th><th>المصروف</th><th>غير مصروف</th><th>الرصيد</th></tr></thead><tbody>
       {rows.map((r) => <tr key={r.division_id}><td>{r.division_name}</td><td className="num">{r.headcount}</td><td className="num">{fmt(r.allocation)}</td>

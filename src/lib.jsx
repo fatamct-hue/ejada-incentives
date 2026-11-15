@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { sb } from './supabase'
+import Icon from './Icon'
+import { CountUp } from './motion'
 
 export const asset = (p) => import.meta.env.BASE_URL + p
 export const TRACKS = {
@@ -61,5 +63,5 @@ export function Modal({ title, onClose, children, foot }) {
   return <div className="mdl on" onClick={onClose}><div className="box" onClick={(e) => e.stopPropagation()}>
     <h3>{title}</h3>{children}{foot && <div className="ft">{foot}</div>}</div></div>
 }
-export const Kpi = ({ l, v, s }) => <div className="card kpi"><div className="l">{l}</div><div className="v num">{v}</div>{s && <div className="s">{s}</div>}</div>
+export const Kpi = ({ l, v, s, icon = 'dash', c, i = 0 }) => <div className="card kpi lift" style={{ '--c': c || 'var(--teal)', '--i': i }}><span className="kic"><Icon n={icon} size={22} /></span><div className="l">{l}</div><div className="v num"><CountUp value={v} /></div>{s && <div className="s">{s}</div>}</div>
 export const Sec = ({ t, children }) => <div className="sec"><h2>{t}</h2><div className="sp" />{children}</div>
