@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { sb } from './supabase'
 
+export const asset = (p) => import.meta.env.BASE_URL + p
 export const TRACKS = {
   service: { name: 'موظف خدمة المستفيدين', short: 'خدمة المستفيدين', c: '#0f446c', cb: '#e1ecf6', period: 'ربع سنوية',
     appr: 'المديرية العامة للتطوير والدراسات', reward: '300 ر.ع لكل فائز',
