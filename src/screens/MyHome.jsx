@@ -16,6 +16,7 @@ export default function MyHome({ go }) {
   const back = yr.filter((n) => n.status === 'needs_info'); const drafts = yr.filter((n) => n.status === 'draft')
   const per = (t) => ({ h: honored.filter((n) => n.track === t).length, a: approved.filter((n) => n.track === t).length })
   const byYear = years.map((y) => ({ y: y.year, c: mine.filter((n) => n.year === y.year && n.status === 'honored').length }))
+  const dq = useApp().dyears.find((x) => x.division_id === me.division_id && x.year === year)?.service_quota
   const svc = (q) => yr.find((n) => n.track === 'service' && n.period === q && APPROVED.includes(n.status)) || yr.find((n) => n.track === 'service' && n.period === q && n.status !== 'draft')
   const ini = yr.filter((n) => n.track === 'initiator'); const inv = yr.filter((n) => n.track === 'innovator')
   return <>
@@ -36,11 +37,14 @@ export default function MyHome({ go }) {
 
     {years.length > 1 && <><div className="sec"><h2>التكريم عبر السنوات</h2></div><div className="years">{byYear.map((b) => <div key={b.y} className={`yb ${b.y === year ? 'on' : ''}`}><b className="num">{b.c}</b><span>{b.y}</span></div>)}</div></>}
 
-    {div?.is_service && <><div className="sec"><h2>خدمة المستفيدين — جائزة كل ربع</h2></div>
+    {div?.is_service && <><div className="sec"><h2>خدمة المستفيدين — المستفيدون في كل ربع</h2><div className="sp" /><span className="muted small">المقرر للسنة: {dq ?? 4}</span></div>
       <div className="card tcard" style={{ '--c': TRACKS.service.c }}><div className="slots">{[1, 2, 3, 4].map((q) => { const n = svc(q); const win = n && APPROVED.includes(n.status)
         return <div key={q} className={`slot ${win ? 'win' : n ? 'pend' : ''}`} style={{ '--i': q, '--c': TRACKS.service.c }}><span className="muted">{periodName('service', q)}</span>
           {win ? <><Icon n="trophy" size={26} style={{ color: 'var(--sand)' }} /><span className="sn">{n.emp_name}</span><Pill s={n.status} /></> : n ? <><Icon n="clock" size={22} style={{ color: TRACKS.service.c }} /><b>قيد المراجعة</b></> : <><Icon n="clock" size={22} style={{ color: '#9aa7ae' }} /><span className="muted">لا ترشيح</span></>}</div> })}</div></div></>}
 
+    {div && !div.is_service && <><div className="sec"><h2>خدمة المستفيدين</h2></div>
+      <div className="card lockcard" style={{ display: 'flex', gap: 14, alignItems: 'center' }}><div className="ic-box" style={{ width: 52, height: 52, borderRadius: 15, display: 'grid', placeItems: 'center', background: 'var(--grey-b)', color: '#7b878b' }}><Icon n="lock" size={26} /></div>
+        <div><b>المسار غير متاح لتقسيمك</b><div className="muted small">مسار خدمة المستفيدين مخصص للجهات التي تقدم خدمات مباشرة للمستفيدين. إن كان تقسيمك مستحقاً فتواصل مع فريق الإجادة لإضافته.</div></div></div></>}
     <div className="sec"><h2>المبادر — ترشيحات السنة</h2><div className="sp" /><button className="btn s t" onClick={() => go('initiator')}><Icon n="plus" size={15} />جديد</button></div>
     <div className="card tcard" style={{ '--c': TRACKS.initiator.c }}>{ini.length ? <div className="tw"><table><thead><tr><th>الموظف</th><th>المبادرة</th><th>الدورة</th><th>المبلغ</th><th>الحالة</th><th /></tr></thead><tbody>
       {ini.map((n) => <tr key={n.id}><td>{n.emp_name}</td><td>{n.initiative_title || '—'}</td><td>{periodName('initiator', n.period)}</td><td className="num">{fmt(n.amount)}</td><td><Pill s={n.status} /></td>

@@ -26,6 +26,8 @@ const P = {
   plus: 'M12 5v14M5 12h14',
   mail: 'M3 6h18v12H3zM3 7l9 7 9-7',
   shield: 'M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z',
+  lock: 'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3',
+  bell: 'M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0',
   cert: 'M5 4h14v12H5zM9 20l3-2 3 2v-4M8 8h8M8 11h5',
 }
 export default function Icon({ n, size = 20, stroke = 1.7, className = '', style }) {

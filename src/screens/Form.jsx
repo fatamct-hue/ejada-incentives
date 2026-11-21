@@ -42,7 +42,7 @@ export default function Form({ track, go }) {
     const id = sessionStorage.getItem('edit')
     if (id) { sessionStorage.removeItem('edit'); const n = noms.find((x) => x.id === id); if (n && n.track === track) {
       setF({ ...blank, ...n, emp_no: n.emp_no, outlet_id: n.outlet_id || '', initiative_date: n.initiative_date || '', amount: n.amount ?? '' }); loadFiles(id) } }
-    if (track === 'initiator') rpc('division_budget', { p_year: year }).then((r) => setBud(r?.[0] || null)).catch(() => {})
+    if (track === 'initiator') rpc('budget_table', { p_year: year }).then((r) => setBud(r?.[0] || null)).catch(() => {})
   }, [])
   useEffect(() => {
     const t = setTimeout(async () => { if (!f.emp_no.trim()) return setEmp(null); const r = await sb.rpc('lookup_employee', { p_emp_no: f.emp_no }); setEmp(r.data?.[0] || false) }, 350)
