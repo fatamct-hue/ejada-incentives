@@ -7,7 +7,7 @@ import NomModal from './NomModal'
 export default function FinanceHome({ go }) {
   const { me, year, noms, divName, rpc } = useApp()
   const [sel, setSel] = useState(null); const [rows, setRows] = useState([])
-  useEffect(() => { rpc('division_budget', { p_year: year }).then((r) => setRows(r || [])).catch(() => {}) }, [year])
+  useEffect(() => { rpc('budget_table', { p_year: year }).then((r) => setRows(r || [])).catch(() => {}) }, [year])
   const yr = useMemo(() => noms.filter((n) => n.year === year), [noms, year])
   const sum = (k) => rows.reduce((s, r) => s + Number(r[k]), 0)
   const lanes = [

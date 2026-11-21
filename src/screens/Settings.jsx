@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
 import { sb } from '../supabase'
-import { useApp, Sec, ROLES, shortName, fdate } from '../lib'
+import { useApp, Sec, ROLES, shortName, fdate, fmt as fmtn } from '../lib'
 import Icon from '../Icon'
 
 const readXlsx = async (file) => { const wb = XLSX.read(await file.arrayBuffer()); return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' }) }
@@ -18,6 +18,9 @@ export default function Settings() {
   const [nu, setNu] = useState({ email: '', full_name: '', role: 'dg', division_id: '' })
   const run = async (p, ok = 'تم الحفظ') => { const { error } = await p; if (error) say(error.message); else { say(ok); reload() } }
   const hc = (id) => dyears.find((d) => d.division_id === id && d.year === year)?.headcount ?? ''
+  const quota = (id) => dyears.find((d) => d.division_id === id && d.year === year)?.service_quota ?? 4
+  const setQuota = (d, v) => { const q = Math.round(Number(v)); if (!Number.isFinite(q) || q < 0 || q > 100) return say('العدد بين 0 و100'); if (q === quota(d.id)) return; run(sb.from('division_years').upsert({ division_id: d.id, year, headcount: Number(hc(d.id)) || 0, service_quota: q }), 'حُفظ عدد المستفيدين') }
+  const totalQuota = divisions.filter((d) => d.is_service && d.active).reduce((s, d) => s + quota(d.id), 0)
   const importEmployees = async (e) => {
     const rows = await readXlsx(e.target.files[0]); const byName = Object.fromEntries(divisions.map((d) => [d.name.trim(), d.id])); const bad = []
     const recs = rows.map((r, i) => { const div = byName[String(r['التقسيم']).trim()]; if (!div) bad.push(i + 2)
@@ -62,11 +65,13 @@ export default function Settings() {
       <div className="f"><label>مكافأة خدمة المستفيدين (ر.ع)</label><input type="number" defaultValue={ys.service_award} onBlur={(e) => run(sb.from('year_settings').update({ service_award: +e.target.value }).eq('year', year))} /></div>
       <div className="f"><label>نصيب الموظف (ر.ع)</label><input type="number" defaultValue={ys.rate_per_employee} onBlur={(e) => run(sb.from('year_settings').update({ rate_per_employee: +e.target.value }).eq('year', year))} /></div>
       <div className="f"><button className="btn o" onClick={async () => { const y = +prompt('السنة الجديدة (مثال 2028)'); if (y) { await rpc('init_year', { p_year: y }); reload() } }}>إضافة سنة جديدة</button></div></div>}
-    {tab === 'div' && <><div className="card tw"><table><thead><tr><th>التقسيم</th><th>الأعلى</th><th>المحافظة</th><th>خدمة</th><th>محسوب ضمن الأعلى</th><th>العدد {year}</th></tr></thead><tbody>
+    {tab === 'div' && <><div className="card tw"><table><thead><tr><th>التقسيم</th><th>الأعلى</th><th>المحافظة</th><th>خدمة</th><th>محسوب ضمن الأعلى</th><th>العدد {year}</th><th>مستفيدو خدمة المستفيدين / السنة</th></tr></thead><tbody>
       {divisions.map((d) => <tr key={d.id}><td>{d.name}</td><td>{divisions.find((x) => x.id === d.parent_id)?.name || '—'}</td><td>{d.governorate}</td>
         <td><input type="checkbox" checked={d.is_service} onChange={(e) => run(sb.from('divisions').update({ is_service: e.target.checked }).eq('id', d.id))} /></td>
         <td><input type="checkbox" checked={d.counted_in_parent} onChange={(e) => run(sb.from('divisions').update({ counted_in_parent: e.target.checked }).eq('id', d.id))} /></td>
-        <td><input className="inp" type="number" style={{ width: 90 }} defaultValue={hc(d.id)} onBlur={(e) => run(sb.from('division_years').upsert({ division_id: d.id, year, headcount: +e.target.value || 0 }))} /></td></tr>)}</tbody></table></div>
+        <td><input className="inp" type="number" style={{ width: 90 }} defaultValue={hc(d.id)} onBlur={(e) => run(sb.from('division_years').upsert({ division_id: d.id, year, headcount: +e.target.value || 0, service_quota: quota(d.id) }))} /></td>
+        <td>{d.is_service ? <input className="inp" type="number" min="0" max="100" style={{ width: 80 }} key={`${d.id}-${quota(d.id)}`} defaultValue={quota(d.id)} onBlur={(e) => setQuota(d, e.target.value)} /> : <span className="muted">—</span>}</td></tr>)}</tbody></table></div>
+      <div className="alert i" style={{ margin: '10px 0' }}><Icon n="service" size={18} />إجمالي مستفيدي خدمة المستفيدين لهذه السنة: <b className="num">{totalQuota}</b> (لكل مستفيد {fmtn(ys?.service_award)} ر.ع). ويتوزع على الأرباع بالتساوي، وتتغير المخصصات تلقائياً.</div>
       <Sec t="إضافة تقسيم" /><div className="card form">
         <div className="f"><label>الاسم</label><input value={nd.name} onChange={(e) => setNd({ ...nd, name: e.target.value })} /></div>
         <div className="f"><label>التقسيم الأعلى</label><select value={nd.parent_id} onChange={(e) => setNd({ ...nd, parent_id: e.target.value })}><option value="">—</option>{divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>

@@ -8,7 +8,7 @@ export default function DG({ go }) {
   const [sel, setSel] = useState(null); const [bud, setBud] = useState(null)
   const div = divisions.find((d) => d.id === me.division_id)
   const mine = noms.filter((n) => n.year === year && n.division_id === me.division_id)
-  useEffect(() => { rpc('division_budget', { p_year: year }).then((r) => setBud(r?.[0] || null)).catch(() => {}) }, [year])
+  useEffect(() => { rpc('budget_table', { p_year: year }).then((r) => setBud(r?.[0] || null)).catch(() => {}) }, [year])
   const c = (f) => mine.filter(f).length
   return <>
     <Sec t={div?.name}><button className="btn t" onClick={() => go('initiator')}>ترشيح مبادر</button>

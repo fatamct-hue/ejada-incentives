@@ -40,7 +40,7 @@ const db = {
   ],
 }
 const role = new URLSearchParams(location.search).get('role') || 'ejada'
-const me = () => db.profiles.find((p) => p.email === role + '@demo') || db.profiles[0]
+const me = () => { const p = db.profiles.find((x) => x.email === role + '@demo') || db.profiles[0]; const dv = new URLSearchParams(location.search).get('div'); return p.role === 'dg' && dv ? { ...p, division_id: dv } : p }
 const alloc = (year) => { const ys = db.year_settings.find((y) => y.year === year); if (!ys?.approved_headcount) return []
   const svc = db.divisions.filter((d) => d.is_service).length; const rem = ys.rate_per_employee * ys.approved_headcount - ys.service_award * svc * 4 - 2400
   const rows = db.division_years.filter((r) => r.year === year && !db.divisions.find((d) => d.id === r.division_id).counted_in_parent); const tot = rows.reduce((s, r) => s + r.headcount, 0)
