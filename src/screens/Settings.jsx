@@ -1,12 +1,19 @@
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
 import { sb } from '../supabase'
-import { useApp, Sec, ROLES } from '../lib'
+import { useApp, Sec, ROLES, shortName, fdate } from '../lib'
+import Icon from '../Icon'
 
 const readXlsx = async (file) => { const wb = XLSX.read(await file.arrayBuffer()); return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' }) }
 export default function Settings() {
-  const { year, ys, divisions, dyears, users, reload, say, rpc } = useApp()
-  const [tab, setTab] = useState('year')
+  const { year, ys, divisions, dyears, users, requests, reload, say, rpc } = useApp()
+  const [dec, setDec] = useState({})
+  const pending = (requests || []).filter((r) => r.status === 'pending')
+  const decide = async (r, ok) => {
+    const d = dec[r.id] || {}; const role = d.role || r.requested_role; const div = d.division ?? r.division_id
+    try { if (ok) { await rpc('approve_access_request', { p_id: r.id, p_role: role, p_division: role === 'dg' ? div : null }); say('اعتُمد الطلب. يستطيع المستخدم الدخول الآن برمز البريد.') } else { await rpc('reject_access_request', { p_id: r.id, p_note: null }); say('رُفض الطلب') } reload() } catch { /* رسالة الخطأ تظهر من rpc */ }
+  }
+  const [tab, setTab] = useState(() => (sessionStorage.getItem('settab') || 'year'))
   const [nd, setNd] = useState({ name: '', parent_id: '', counted_in_parent: false, governorate: '', is_service: false, headcount: '' })
   const [nu, setNu] = useState({ email: '', full_name: '', role: 'dg', division_id: '' })
   const run = async (p, ok = 'تم الحفظ') => { const { error } = await p; if (error) say(error.message); else { say(ok); reload() } }
@@ -36,7 +43,19 @@ export default function Settings() {
     await sb.from('division_years').upsert({ division_id: data.id, year, headcount: +nd.headcount || 0 }); setNd({ name: '', parent_id: '', counted_in_parent: false, governorate: '', is_service: false, headcount: '' }); say('أُضيف التقسيم'); reload()
   }
   return <>
-    <div className="tabs">{[['year', 'السنة'], ['div', 'التقسيمات'], ['users', 'المستخدمون'], ['emp', 'سجل الموظفين']].map(([k, l]) => <button key={k} className={`btn s ${tab === k ? '' : 'o'}`} onClick={() => setTab(k)}>{l}</button>)}</div>
+    <div className="tabs">{[['req', `طلبات الانضمام${pending.length ? ' (' + pending.length + ')' : ''}`], ['year', 'السنة'], ['div', 'التقسيمات'], ['users', 'المستخدمون'], ['emp', 'سجل الموظفين']].map(([k, l]) => <button key={k} className={`btn s ${tab === k ? '' : 'o'}`} onClick={() => setTab(k)}>{l}</button>)}</div>
+    {tab === 'req' && <>
+      {!pending.length && <div className="card empty"><Icon n="check" size={26} />لا توجد طلبات انضمام معلّقة.</div>}
+      <div className="grid g2 stg">{pending.map((r, i) => { const d = dec[r.id] || {}; const role = d.role || r.requested_role
+        return <div className="card reqc" key={r.id} style={{ '--i': i }}>
+          <div className="rq-h"><span className="rq-av"><Icon n="users" size={20} /></span><div><b>{r.full_name}</b><div className="muted small" dir="ltr" style={{ textAlign: 'right' }}>{r.email}</div></div><span className="muted small" style={{ marginInlineStart: 'auto' }}>{fdate(r.created_at)}</span></div>
+          <div className="muted small">{[r.job_title, r.phone].filter(Boolean).join(' · ')}</div>
+          <div className="form" style={{ marginTop: 10 }}>
+            <div className="f"><label>الصفة</label><select value={role} onChange={(e) => setDec({ ...dec, [r.id]: { ...d, role: e.target.value } })}>{Object.entries(ROLES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+            {role === 'dg' && <div className="f"><label>التقسيم</label><select value={d.division ?? r.division_id ?? ''} onChange={(e) => setDec({ ...dec, [r.id]: { ...d, division: e.target.value } })}><option value="">اختر</option>{divisions.map((x) => <option key={x.id} value={x.id}>{shortName(x.name)}</option>)}</select></div>}</div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}><button className="btn g" style={{ flex: 1 }} onClick={() => decide(r, true)}><Icon n="check" size={16} />اعتماد وتفعيل</button><button className="btn o" onClick={() => decide(r, false)}>رفض</button></div></div> })}</div>
+      {(requests || []).some((r) => r.status !== 'pending') && <><Sec t="الطلبات المنتهية" /><div className="card tw"><table><thead><tr><th>الاسم</th><th>البريد</th><th>الصفة</th><th>القرار</th><th>بواسطة</th></tr></thead><tbody>
+        {requests.filter((r) => r.status !== 'pending').map((r) => <tr key={r.id}><td>{r.full_name}</td><td dir="ltr">{r.email}</td><td>{ROLES[r.requested_role]}</td><td><span className={`pill ${r.status === 'approved' ? 'st-approved' : 'st-draft'}`}>{r.status === 'approved' ? 'معتمد' : 'مرفوض'}</span></td><td>{r.decided_by}</td></tr>)}</tbody></table></div></>}</>}
     {tab === 'year' && ys && <div className="card form">
       <div className="f"><label>العدد المعتمد لإجمالي الموظفين</label><input type="number" defaultValue={ys.approved_headcount ?? ''} onBlur={(e) => run(sb.from('year_settings').update({ approved_headcount: e.target.value === '' ? null : +e.target.value, headcount_is_demo: false }).eq('year', year))} /></div>
       <div className="f"><label>التاريخ المرجعي</label><input type="date" defaultValue={ys.reference_date || ''} onBlur={(e) => run(sb.from('year_settings').update({ reference_date: e.target.value || null }).eq('year', year))} /></div>

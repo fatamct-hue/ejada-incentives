@@ -1,4 +1,5 @@
--- يحذف كل البيانات التجريبية دون المساس بالحقيقية
+-- يحذف كل البيانات التجريبية دون المساس بالحقيقية.
+-- ملاحظة: التقسيمات الحقيقية (22 تقسيماً من ملف الوزارة) لا تُحذف لأنها ليست تجريبية.
 delete from nomination_events where nomination_id in (select id from nominations where is_demo);
 delete from attachments where nomination_id in (select id from nominations where is_demo);
 delete from nominations where is_demo

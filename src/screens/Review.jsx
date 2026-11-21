@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useApp, Pill, Tk, periodName, approverOf, Sec } from '../lib'
+import { useApp, Pill, Tk, periodName, approverOf, Sec, ROLE_META } from '../lib'
+import Icon from '../Icon'
 import NomModal from './NomModal'
 
 const TABS = {
@@ -16,7 +17,9 @@ export default function Review() {
   const f = tabs.find((t) => t[0] === tab)[2]
   const rows = noms.filter((n) => n.year === year && f(n))
   const emps = [...new Set(conf.map((c) => c.emp_no))]
+  const M = ROLE_META[me.role]
   return <>
+    <div className="card rolebar" style={{ '--c': M.c }}><Icon n={M.icon} size={22} /><div><b>{M.title}</b><div className="muted small">{M.duties.join(' · ')}</div></div></div>
     {emps.length > 0 && <div className="alert w" style={{ marginBottom: 12 }}><div><b>تعارض مسارات:</b> {emps.length} موظف مرشحون في أكثر من مسار هذه السنة.
       {emps.map((e) => { const rs = conf.filter((c) => c.emp_no === e); return <div key={e} className="small">{rs[0].emp_name} ({e}): {rs.map((r, i) => <span key={i}>{r.track} {periodName(r.track, r.period)} — </span>)}
         {rs.map((r) => <button key={r.nomination_id} className="btn s o" style={{ marginInlineStart: 4 }} onClick={async () => { await rpc('resolve_conflict', { p_keep: r.nomination_id, p_note: 'تعارض مسار' }); location.reload() }}>إبقاء {r.track}</button>)}</div> })}</div></div>}
