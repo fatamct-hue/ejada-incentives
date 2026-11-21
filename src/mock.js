@@ -64,6 +64,14 @@ const rpcs = {
     n.status = to; log(n, p_action, from); return n },
   save_innovator_result: ({ p }) => { const e = db.employees.find((x) => x.emp_no === p.emp_no); db.nominations.unshift(mkNom({ track: 'innovator', year: p.year, period: p.period, rank: p.rank, emp_no: e.emp_no, division_id: p.division_id || e.division_id, status: 'recommended',
     amount: db.year_settings.find((y) => y.year === p.year).innovator_prizes[p.rank], idea_title: p.idea_title, idea_no: p.idea_no, approved_on: p.approved_on, is_team: p.is_team, team: p.team })); return 'ok' },
+  budget_summary: ({ p_year }) => { const a = alloc(p_year); const ys = db.year_settings.find((y) => y.year === p_year); const svc = db.divisions.filter((d) => d.is_service).length; const pool = ys.approved_headcount * 15; const rem = pool - svc * 1200 - 2400
+    const hc = a.reduce((s, x) => s + x.headcount, 0); return [{ total_pool: pool, service_total: svc * 1200, innovator_total: 2400, remaining: rem, per_employee: Math.round(rem / hc * 1000) / 1000, included_headcount: hc, approved_headcount: ys.approved_headcount, allocated: a.reduce((s, x) => s + x.allocation, 0), unallocated: 0 }] },
+  budget_table: ({ p_year }) => alloc(p_year).filter((a) => me().role !== 'dg' || a.division_id === me().division_id).map((a) => { const d = db.divisions.find((x) => x.id === a.division_id)
+    const ns = db.nominations.filter((n) => n.year === p_year && n.division_id === a.division_id); const ap = ['approved', 'to_pay', 'paid', 'honored']
+    const q = (p) => ns.filter((n) => n.track === 'initiator' && n.period === p && ap.includes(n.status)).reduce((s, n) => s + +n.amount, 0)
+    const inv = ns.filter((n) => n.track === 'innovator' && ap.includes(n.status)).reduce((s, n) => s + +n.amount, 0); const used = q(1) + q(2) + q(3) + q(4)
+    return { division_id: a.division_id, division_name: d.name, headcount: a.headcount, is_service: d.is_service, computed: a.allocation, override: null, allocation: a.allocation, service_amount: d.is_service ? 1200 : 0, innovator_amount: inv, q1: q(1), q2: q(2), q3: q(3), q4: q(4),
+      paid: ns.filter((n) => n.track === 'initiator' && ['paid', 'honored'].includes(n.status)).reduce((s, n) => s + +n.amount, 0), unpaid: 0, balance: a.allocation - used, total: a.allocation + (d.is_service ? 1200 : 0) + inv } }),
   public_divisions: () => db.divisions.map((d) => ({ id: d.id, name: d.name })),
   request_access: () => 'ok', approve_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'approved'; }, reject_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'rejected'; },
   find_conflicts: () => [], resolve_conflict: () => 0, init_year: () => null, close_year: () => null,

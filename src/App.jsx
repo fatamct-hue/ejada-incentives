@@ -2,7 +2,7 @@ import { Component, useEffect, useState } from 'react'
 import { sb, configured } from './supabase'
 import { Provider, useApp, ROLES, ROLE_META, asset, shortName } from './lib'
 import Icon from './Icon'
-import Login from './Login'
+import Landing from './Landing'
 import CommandHome from './screens/CommandHome'
 import ApprovalHome from './screens/ApprovalHome'
 import FinanceHome from './screens/FinanceHome'
@@ -104,7 +104,7 @@ export default function App() {
   }, [session])
   if (!configured) return <div className="login"><div className="card"><h2>المنصة غير مهيأة</h2><div className="muted">لم تُضبط مفاتيح Supabase (VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY).</div></div></div>
   if (session === undefined) return null
-  if (!session) return <Login />
+  if (!session) return <Landing />
   if (denied) return <div className="login"><div className="card"><h2>الحساب غير مسجل</h2><div className="muted">بريدك غير مضاف في قائمة المستخدمين. قدّم طلب انضمام ليعتمده فريق الإجادة.</div>
     <div style={{ display: 'flex', gap: 8 }}><button className="btn t" onClick={() => { sessionStorage.setItem('reqmode', '1'); setDenied(false); sb.auth.signOut() }}>تقديم طلب انضمام</button><button className="btn o" onClick={() => { setDenied(false); sb.auth.signOut() }}>خروج</button></div></div></div>
   if (!me) return null
