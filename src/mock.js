@@ -21,9 +21,10 @@ const score = (v) => Object.fromEntries(criteria.filter((c) => c.track === 'serv
 const mkNom = (o) => ({ id: uid(), year: 2026, status: 'draft', scores: {}, evidence_notes: {}, total: 0, team: [], people: [o.emp_no], created_at: new Date().toISOString(), job_title: 'أخصائي', direct_manager: 'مدير الدائرة',
   justification: 'تميز في الأداء وإنجاز المعاملات بدقة وسرعة ملحوظة.', ...o, emp_name: employees.find((e) => e.emp_no === o.emp_no).name })
 const db = {
-  year_settings: [{ year: 2026, approved_headcount: 600, reference_date: '2026-01-01', rate_per_employee: 15, service_award: 300, innovator_prizes: { 1: 500, 2: 400, 3: 300 }, closed: false }, { year: 2027, approved_headcount: null, closed: false }],
+  year_settings: [{ year: 2026, approved_headcount: 1500, reference_date: '2026-01-01', rate_per_employee: 15, service_award: 300, innovator_prizes: { 1: 500, 2: 400, 3: 300 }, closed: false }, { year: 2027, approved_headcount: null, closed: false }],
   divisions: divs, outlets: [], division_years: divs.map((d, i) => ({ division_id: d.id, year: 2026, headcount: heads[i] })), cycles: cyc, criteria,
   employees, attachments: [], nomination_events: [], publish_versions: [],
+  access_requests: [{ id: 'r1', full_name: 'سعيد بن علي الحارثي', email: 'saeed@example.test', requested_role: 'dg', division_id: 'd1', job_title: 'مدير عام', phone: '99000000', status: 'pending', created_at: new Date().toISOString() }, { id: 'r2', full_name: 'مريم بنت سالم', email: 'maryam@example.test', requested_role: 'dev', job_title: 'أخصائية', status: 'pending', created_at: new Date().toISOString() }],
   profiles: [{ id: 'u1', email: 'ejada@demo', full_name: 'عضو فريق الإجادة', role: 'ejada', is_super: true, active: true }, { id: 'u2', email: 'dg@demo', full_name: 'المدير العام لمديرية مسقط', role: 'dg', division_id: 'd0', active: true },
     { id: 'u3', email: 'dev@demo', full_name: 'التطوير والدراسات', role: 'dev', active: true }, { id: 'u4', email: 'fin@demo', full_name: 'الشؤون الإدارية والمالية', role: 'admin_fin', active: true }],
   nominations: [
@@ -63,6 +64,8 @@ const rpcs = {
     n.status = to; log(n, p_action, from); return n },
   save_innovator_result: ({ p }) => { const e = db.employees.find((x) => x.emp_no === p.emp_no); db.nominations.unshift(mkNom({ track: 'innovator', year: p.year, period: p.period, rank: p.rank, emp_no: e.emp_no, division_id: p.division_id || e.division_id, status: 'recommended',
     amount: db.year_settings.find((y) => y.year === p.year).innovator_prizes[p.rank], idea_title: p.idea_title, idea_no: p.idea_no, approved_on: p.approved_on, is_team: p.is_team, team: p.team })); return 'ok' },
+  public_divisions: () => db.divisions.map((d) => ({ id: d.id, name: d.name })),
+  request_access: () => 'ok', approve_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'approved'; }, reject_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'rejected'; },
   find_conflicts: () => [], resolve_conflict: () => 0, init_year: () => null, close_year: () => null,
   cycle_status: ({ p_year }) => db.cycles.filter((c) => c.year === p_year).map((c) => { const ns = db.nominations.filter((n) => n.track === c.track && n.period === c.period && n.year === p_year); const ap = ns.filter((n) => ['approved', 'to_pay', 'paid', 'honored'].includes(n.status)).length
     const ex = c.track === 'service' ? 6 : c.track === 'innovator' ? 3 : 0; const pn = ns.filter((n) => ['sent', 'review', 'recommended'].includes(n.status)).length

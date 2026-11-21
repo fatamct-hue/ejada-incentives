@@ -24,6 +24,13 @@ export const ST = [['draft', 'مسودة'], ['sent', 'مرسل'], ['needs_info',
 export const STN = Object.fromEntries(ST)
 export const APPROVED = ['approved', 'to_pay', 'paid', 'honored']
 export const ROLES = { dg: 'المدير العام / المسؤول الأعلى', ejada: 'فريق الإجادة المؤسسية', dev: 'المديرية العامة للتطوير والدراسات', admin_fin: 'المديرية العامة للشؤون الإدارية والمالية' }
+export const ROLE_META = {
+  dg: { title: 'المدير العام', home: 'الرئيسية', c: '#006452', c2: '#00827a', icon: 'unit', duties: ['تعبئة الاستمارات', 'اعتماد وإرسال الترشيحات', 'استكمال المُعاد'] },
+  ejada: { title: 'فريق الإجادة المؤسسية', home: 'لوحة القيادة', c: '#00827a', c2: '#0f446c', icon: 'shield', duties: ['استلام الترشيحات ومراجعتها', 'التوصية أو الإعادة للاستكمال', 'حسم التعارض بين المسارات', 'نتائج المبتكر وتسجيل التكريم', 'الدورات والإعدادات والمستخدمون'] },
+  dev: { title: 'المديرية العامة للتطوير والدراسات', home: 'لوحة الاعتماد', c: '#0f446c', c2: '#00253e', icon: 'review', duties: ['اعتماد ترشيحات خدمة المستفيدين', 'اعتماد نتائج المبتكر', 'الإعادة للاستكمال عند الحاجة'] },
+  admin_fin: { title: 'المديرية العامة للشؤون الإدارية والمالية', home: 'لوحة الصرف', c: '#aa7f67', c2: '#5c3f2e', icon: 'coin', duties: ['اعتماد ترشيحات المبادر', 'الإحالة للصرف', 'تسجيل الصرف', 'متابعة المخصصات'] },
+}
+export const shortName = (n = '') => n.replace('المديرية العامة للإسكان والتخطيط العمراني بمحافظة ', 'مديرية ')
 export const fmt = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 3 })
 export const fdate = (d) => (d ? new Date(d).toLocaleDateString('ar-OM-u-nu-latn') : '—')
 export const approverOf = (t) => (t === 'initiator' ? 'admin_fin' : 'dev')
@@ -33,17 +40,18 @@ export const useApp = () => useContext(Ctx)
 
 export function Provider({ me, children }) {
   const [year, setYear] = useState(2026)
-  const [d, setD] = useState({ years: [], divisions: [], outlets: [], dyears: [], cycles: [], criteria: [], noms: [], users: [], loaded: false })
+  const [d, setD] = useState({ years: [], divisions: [], outlets: [], dyears: [], cycles: [], criteria: [], noms: [], users: [], requests: [], loaded: false })
   const [toast, setToast] = useState('')
   const say = useCallback((m) => { setToast(m); setTimeout(() => setToast(''), 3200) }, [])
   const reload = useCallback(async () => {
     const q = (t, f) => (f ? f(sb.from(t).select('*')) : sb.from(t).select('*'))
-    const [years, divisions, outlets, dyears, cycles, criteria, noms, users] = await Promise.all([
+    const [years, divisions, outlets, dyears, cycles, criteria, noms, users, requests] = await Promise.all([
       q('year_settings'), q('divisions'), q('outlets'), q('division_years'), q('cycles'), q('criteria'),
       sb.from('nominations').select('*').order('created_at', { ascending: false }).limit(5000),
-      me.role === 'ejada' ? q('profiles') : Promise.resolve({ data: [] })])
+      me.role === 'ejada' ? q('profiles') : Promise.resolve({ data: [] }),
+      me.role === 'ejada' ? sb.from('access_requests').select('*').order('created_at', { ascending: false }) : Promise.resolve({ data: [] })])
     setD({ years: years.data || [], divisions: divisions.data || [], outlets: outlets.data || [], dyears: dyears.data || [],
-      cycles: cycles.data || [], criteria: (criteria.data || []).sort((a, b) => a.ord - b.ord), noms: noms.data || [], users: users.data || [], loaded: true })
+      cycles: cycles.data || [], criteria: (criteria.data || []).sort((a, b) => a.ord - b.ord), noms: noms.data || [], users: users.data || [], requests: requests.data || [], loaded: true })
   }, [me.role])
   useEffect(() => { reload() }, [reload])
   const ys = d.years.find((y) => y.year === year)
