@@ -16,14 +16,16 @@ import Budget from './screens/Budget'
 import Cycles from './screens/Cycles'
 import Reports from './screens/Reports'
 import Settings from './screens/Settings'
+import Criteria from './screens/Criteria'
 
 const NAV = [
   ['home', 'home', { dg: 'الرئيسية', ejada: 'لوحة القيادة', dev: 'لوحة الاعتماد', admin_fin: 'لوحة الصرف' }],
   ['dg', 'unit', { dg: 'ترشيحاتي' }],
   ['service', 'service', { dg: 'استمارة خدمة المستفيدين' }],
   ['initiator', 'spark', { dg: 'استمارة المبادر' }],
-  ['review', 'review', { ejada: 'المراجعة والتوصية', dev: 'اعتماد الترشيحات', admin_fin: 'الاعتماد والصرف' }],
+  ['review', 'review', { ejada: 'استلام الترشيحات ومراجعتها', dev: 'اعتماد الترشيحات', admin_fin: 'الاعتماد والصرف' }],
   ['innovator', 'bulb', { ejada: 'نتائج المبتكر', dev: 'نتائج المبتكر' }],
+  ['criteria', 'form', { ejada: 'معايير التقييم', dev: 'معايير التقييم', admin_fin: 'معايير التقييم' }],
   ['dash', 'dash', { ejada: 'المتابعة والتحليل', dev: 'المتابعة والتحليل', admin_fin: 'المتابعة والتحليل' }],
   ['budget', 'coin', { dg: 'ميزانيتي', ejada: 'الميزانية والمخصصات', admin_fin: 'الميزانية والمخصصات' }],
   ['cycles', 'cycle', { ejada: 'الدورات والإقفال' }],
@@ -47,7 +49,7 @@ function ViewAs() {
   const { me, divisions, rpc } = useApp()
   const [busy, setBusy] = useState(false)
   const go = async (role, d) => { setBusy(true); try { await rpc('set_view_as', { p_role: role, p_division: d || null }); location.hash = 'home'; location.reload() } catch { setBusy(false) } }
-  const opts = [['ejada', 'فريق الإجادة', 'shield'], ['dev', 'التطوير والدراسات', 'review'], ['admin_fin', 'الشؤون الإدارية والمالية', 'coin']]
+  const opts = [['ejada', 'فريق الإجادة', 'shield'], ['dev', 'جهة اعتماد: التطوير والدراسات', 'review'], ['admin_fin', 'جهة اعتماد: الشؤون الإدارية والمالية', 'coin']]
   return <div className="role viewas"><label><Icon n="shield" size={14} /> وضع العرض (مشرف أعلى)</label>
     <div className="vhint">شاهد المنصة بصفة:</div>
     {opts.map(([r, l, ic]) => <button key={r} disabled={busy} className={`vbtn ${me.role === r ? 'on' : ''}`} onClick={() => go(r)}><Icon n={ic} size={16} />{l}</button>)}
@@ -65,7 +67,7 @@ function Shell() {
   const pendReq = (requests || []).filter((r) => r.status === 'pending').length
   const go = (p) => { location.hash = p; setOpen(false) }
   const cur = nav.find((n) => n[0] === page) || nav[0]
-  const S = { home: { dg: MyHome, ejada: CommandHome, dev: ApprovalHome, admin_fin: FinanceHome }[me.role], dg: DG, service: Form, initiator: Form, innovator: Innovator, dash: Dashboard, review: Review, budget: Budget, cycles: Cycles, reports: Reports, settings: Settings }[cur[0]]
+  const S = { home: { dg: MyHome, ejada: CommandHome, dev: ApprovalHome, admin_fin: FinanceHome }[me.role], dg: DG, service: Form, initiator: Form, innovator: Innovator, dash: Dashboard, review: Review, budget: Budget, cycles: Cycles, reports: Reports, settings: Settings, criteria: Criteria }[cur[0]]
   return <div className="app">
     <aside className={`side ${open ? 'open' : ''}`}>
       <img src={asset('brand/logo-horizontal-white.png')} alt="وزارة الإسكان والتخطيط العمراني" style={{ width: '100%' }} />

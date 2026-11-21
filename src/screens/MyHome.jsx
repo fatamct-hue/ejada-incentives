@@ -12,7 +12,7 @@ export default function MyHome({ go }) {
   const yr = mine.filter((n) => n.year === year)
   const honored = yr.filter((n) => n.status === 'honored')
   const approved = yr.filter((n) => APPROVED.includes(n.status))
-  const pending = yr.filter((n) => ['sent', 'review', 'recommended'].includes(n.status))
+  const pending = yr.filter((n) => ['sent', 'review'].includes(n.status))
   const back = yr.filter((n) => n.status === 'needs_info'); const drafts = yr.filter((n) => n.status === 'draft')
   const per = (t) => ({ h: honored.filter((n) => n.track === t).length, a: approved.filter((n) => n.track === t).length })
   const byYear = years.map((y) => ({ y: y.year, c: mine.filter((n) => n.year === y.year && n.status === 'honored').length }))
