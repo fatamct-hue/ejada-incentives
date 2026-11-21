@@ -56,8 +56,22 @@ function Login() {
   </form></div>
 }
 
+
+function ViewAs() {
+  const { me, divisions, rpc } = useApp()
+  const [div, setDiv] = useState(me.division_id || '')
+  const [busy, setBusy] = useState(false)
+  const go = async (role, d) => { setBusy(true); try { await rpc('set_view_as', { p_role: role, p_division: d || null }); location.reload() } catch { setBusy(false) } }
+  const opts = [['ejada', 'فريق الإجادة', 'shield'], ['dev', 'التطوير والدراسات', 'review'], ['admin_fin', 'الشؤون الإدارية والمالية', 'coin']]
+  return <div className="role viewas"><label><Icon n="shield" size={14} /> وضع العرض (مشرف أعلى)</label>
+    {opts.map(([r, l, ic]) => <button key={r} disabled={busy} className={`vbtn ${me.role === r ? 'on' : ''}`} onClick={() => go(r)}><Icon n={ic} size={16} />{l}</button>)}
+    <div className="vdg"><button disabled={busy || !div} className={`vbtn ${me.role === 'dg' ? 'on' : ''}`} onClick={() => go('dg', div)}><Icon n="unit" size={16} />مدير عام</button>
+      <select value={div} onChange={(e) => setDiv(e.target.value)}><option value="">اختر التقسيم</option>{divisions.filter((d) => d.active).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
+    {(me.role !== 'ejada') && <button className="vbtn reset" disabled={busy} onClick={() => go(null)}><Icon n="arrow" size={16} />العودة لوضعي الأصلي</button>}</div>
+}
+
 function Shell() {
-  const { me, year, setYear, years, toast, loaded } = useApp()
+  const { me, year, setYear, years, toast, loaded, divisions } = useApp()
   const [page, setPage] = useState((location.hash || '#home').slice(1).split('?')[0])
   const [open, setOpen] = useState(false)
   useEffect(() => { const h = () => setPage((location.hash || '#home').slice(1).split('?')[0]); addEventListener('hashchange', h); return () => removeEventListener('hashchange', h) }, [])
@@ -72,7 +86,8 @@ function Shell() {
       <nav className="nav">{nav.map(([k, l, , ic]) => <a key={k} href={'#' + k} className={cur[0] === k ? 'on' : ''} onClick={() => setOpen(false)}><Icon n={ic} />{l}</a>)}</nav>
       <div className="role"><label>{ROLES[me.role]}</label><b>{me.full_name}</b>
         <button className="btn o s" style={{ marginTop: 8 }} onClick={() => sb.auth.signOut()}><Icon n="out" size={14} />خروج</button></div>
-      {import.meta.env.VITE_DEMO === '1' && <div className="role"><label>معاينة بالأدوار (بيانات وهمية)</label>
+      {me.is_super && <ViewAs />}
+      {import.meta.env.VITE_DEMO === '1' && !me.is_super && <div className="role"><label>معاينة بالأدوار (بيانات وهمية)</label>
         {[['ejada', 'فريق الإجادة'], ['dg', 'مدير عام'], ['dev', 'التطوير والدراسات'], ['fin', 'الشؤون المالية']].map(([r, l]) => <a key={r} href={'?role=' + r + location.hash} style={{ display: 'block', color: '#4ad6ed', padding: '3px 0' }}>{l}</a>)}</div>}
       <div style={{ flex: 1 }} />
       <img src={asset('brand/ejada-logo-white.png')} alt="إجادة" style={{ width: 120, alignSelf: 'flex-start', opacity: .9 }} />
@@ -82,6 +97,7 @@ function Shell() {
       <div className="topbar"><button className="btn o s mtop" onClick={() => setOpen(!open)}><Icon n="menu" size={18} /></button>
         <h1><Icon n={cur[3]} size={24} />{cur[1]}</h1>
         <div className="yr">السنة <select value={year} onChange={(e) => setYear(+e.target.value)}>{years.map((y) => <option key={y.year}>{y.year}</option>)}</select></div></div>
+      {me.is_super && me.role !== 'ejada' && <div className="vbanner"><Icon n="shield" size={16} />وضع العرض: تُشاهد المنصة الآن كـ <b>{ROLES[me.role]}{me.role === 'dg' ? ' — ' + (divisions.find((d) => d.id === me.division_id)?.name || '') : ''}</b></div>}
       <div className="content">{loaded ? <div className="page" key={cur[0] + year}><S track={cur[0]} go={go} /></div> : <div className="grid g4">{[0, 1, 2, 3].map((i) => <div key={i} className="skel" />)}</div>}</div>
     </div>
     <div className={`toast ${toast ? 'on' : ''}`}>{toast}</div>

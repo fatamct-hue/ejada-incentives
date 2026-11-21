@@ -24,7 +24,7 @@ const db = {
   year_settings: [{ year: 2026, approved_headcount: 600, reference_date: '2026-01-01', rate_per_employee: 15, service_award: 300, innovator_prizes: { 1: 500, 2: 400, 3: 300 }, closed: false }, { year: 2027, approved_headcount: null, closed: false }],
   divisions: divs, outlets: [], division_years: divs.map((d, i) => ({ division_id: d.id, year: 2026, headcount: heads[i] })), cycles: cyc, criteria,
   employees, attachments: [], nomination_events: [], publish_versions: [],
-  profiles: [{ id: 'u1', email: 'ejada@demo', full_name: 'عضو فريق الإجادة', role: 'ejada', active: true }, { id: 'u2', email: 'dg@demo', full_name: 'المدير العام لمديرية مسقط', role: 'dg', division_id: 'd0', active: true },
+  profiles: [{ id: 'u1', email: 'ejada@demo', full_name: 'عضو فريق الإجادة', role: 'ejada', is_super: true, active: true }, { id: 'u2', email: 'dg@demo', full_name: 'المدير العام لمديرية مسقط', role: 'dg', division_id: 'd0', active: true },
     { id: 'u3', email: 'dev@demo', full_name: 'التطوير والدراسات', role: 'dev', active: true }, { id: 'u4', email: 'fin@demo', full_name: 'الشؤون الإدارية والمالية', role: 'admin_fin', active: true }],
   nominations: [
     mkNom({ track: 'service', period: 1, division_id: 'd0', emp_no: '1001', status: 'honored', total: 92, scores: score(9), honored_on: '2026-04-30', paid_on: '2026-04-20', amount: 300 }),
@@ -47,6 +47,7 @@ const alloc = (year) => { const ys = db.year_settings.find((y) => y.year === yea
 const log = (n, action, from) => db.nomination_events.push({ id: Date.now() + Math.random(), nomination_id: n.id, actor_name: me().full_name, action, from_status: from, to_status: n.status, at: new Date().toISOString() })
 const rpcs = {
   me: () => me(),
+  set_view_as: ({ p_role }) => { const m = { admin_fin: 'fin', dg: 'dg', dev: 'dev' }; history.replaceState(null, '', '?role=' + (m[p_role] || 'ejada') + location.hash) },
   lookup_employee: ({ p_emp_no }) => db.employees.filter((e) => e.emp_no === String(p_emp_no).trim() && (me().role !== 'dg' || e.division_id === me().division_id)),
   division_budget: ({ p_year }) => alloc(p_year).filter((a) => me().role !== 'dg' || a.division_id === me().division_id).map((a) => {
     const ns = db.nominations.filter((n) => n.year === p_year && n.track === 'initiator' && n.division_id === a.division_id); const ap = ['approved', 'to_pay', 'paid', 'honored']

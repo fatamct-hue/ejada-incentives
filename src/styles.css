@@ -353,3 +353,15 @@ tr:hover td{background:rgba(255,255,255,.5)}
 .star:hover{transform:translateY(-3px) scale(1.12)}
 .star.on svg{fill:var(--sc);stroke:var(--sc);filter:drop-shadow(0 4px 8px color-mix(in srgb,var(--sc) 55%,transparent));animation:pop .3s var(--ease) both;animation-delay:calc(var(--i)*40ms)}
 @media (max-width:560px){.star svg{width:44px;height:44px}.stars{justify-content:space-between}}
+
+/* وضع العرض (المشرف الأعلى) */
+.viewas{display:flex;flex-direction:column;gap:6px}
+.viewas label{display:flex;gap:6px;align-items:center;color:var(--cyan)}
+.vbtn{display:flex;align-items:center;gap:8px;width:100%;border:0;border-radius:9px;padding:8px 10px;background:rgba(255,255,255,.07);color:#e8eef3;cursor:pointer;font-size:13px;text-align:right;transition:background .2s,transform .2s var(--ease)}
+.vbtn:hover:not(:disabled){background:rgba(74,214,237,.18);transform:translateX(-3px)}
+.vbtn.on{background:rgba(74,214,237,.28);color:#fff;box-shadow:inset -3px 0 0 var(--cyan)}
+.vbtn.reset{background:rgba(255,255,255,.14);margin-top:2px}
+.vbtn:disabled{opacity:.5;cursor:wait}
+.vdg{display:flex;flex-direction:column;gap:5px}
+.vdg select{width:100%;background:#0b3554;border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:6px;font-size:12.5px}
+.vbanner{display:flex;gap:8px;align-items:center;justify-content:center;padding:7px 14px;font-size:13px;color:#00253e;background:linear-gradient(90deg,#4ad6ed,#5eccc9);position:sticky;top:61px;z-index:4}
