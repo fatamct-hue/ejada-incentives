@@ -9,19 +9,25 @@ const rating = (v, max = 10) => { const r = v / max; return r >= 0.95 ? ['ممت
 const GCOL = ['#006452', '#0f446c', '#aa7f67', '#00827a']
 const GICON = [['service', 'service'], ['initiator', 'spark']]
 const STAR_COL = ['#d2a98b', '#9fb4c6', '#5f8cb0', '#00a393', '#43b987']
+function NumScale({ value, max, onChange }) {
+  return <div className="scale" style={{ gridTemplateColumns: `repeat(${Math.min(max, 10)},1fr)` }} role="radiogroup">{Array.from({ length: max }, (_, i) => i + 1).map((n) => {
+    const on = value >= n; const c = SC[Math.min(9, Math.round((n / max) * 10) - 1)]
+    return <button type="button" key={n} className={`${on ? 'on' : ''} ${value === n ? 'cur' : ''}`} style={{ '--sc': c }} onClick={() => onChange(value === n ? undefined : n)}>{n}</button> })}</div>
+}
 function Scale({ value, max, onChange }) {
+  if (max % 5 !== 0) return <NumScale value={value} max={max} onChange={onChange} />
   const step = max / 5; const stars = Math.round(value / step)
   return <div className="stars" role="radiogroup">{[1, 2, 3, 4, 5].map((n) => {
     const on = stars >= n; const c = STAR_COL[Math.max(0, stars - 1)]
     return <button type="button" key={n} className={`star ${on ? 'on' : ''}`} style={{ '--sc': c, '--i': n }} onClick={() => onChange(stars === n ? undefined : n * step)} aria-label={`${n} من 5`}>
       <svg viewBox="0 0 24 24" width="34" height="34"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.3 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z" strokeLinejoin="round" /></svg></button> })}</div>
 }
-function Gauge({ total }) {
-  const R = 86, C = Math.PI * R; const len = (Math.min(100, total) / 100) * C; const [t, c] = rating(total, 100)
+function Gauge({ total, max = 100 }) {
+  const R = 86, C = Math.PI * R; const len = (Math.min(max, total) / (max || 1)) * C; const [t, c] = rating(total, max)
   return <svg className="gauge" viewBox="0 0 200 120"><path className="arc" d="M14 106 A86 86 0 0 1 186 106" stroke="rgba(0,37,62,.1)" />
     <path className="arc val" d="M14 106 A86 86 0 0 1 186 106" stroke={c} strokeDasharray={`${len} ${C}`} />
     <text x="100" y="92" textAnchor="middle" fontSize="40" fontWeight="900" fill="#00253e" style={{ fontFamily: 'var(--fb)' }}>{total}</text>
-    <text x="100" y="112" textAnchor="middle" fontSize="13" fill="#5d7383" style={{ fontFamily: 'var(--fb)' }}>من 100 · {total ? t : '—'}</text></svg>
+    <text x="100" y="112" textAnchor="middle" fontSize="13" fill="#5d7383" style={{ fontFamily: 'var(--fb)' }}>من {max} · {total ? t : '—'}</text></svg>
 }
 export default function Form({ track, go }) {
   const { me, year, ys, criteria, cycles, outlets, divisions, noms, rpc, reload, say } = useApp()
@@ -43,6 +49,7 @@ export default function Form({ track, go }) {
     return () => clearTimeout(t)
   }, [f.emp_no])
   const loadFiles = async (id) => { const r = await sb.from('attachments').select('*').eq('nomination_id', id); setFiles(r.data || []) }
+  const maxTotal = crit.reduce((s, c) => s + c.max_score, 0)
   const total = crit.reduce((s, c) => s + (Number(f.scores[c.id]) || 0), 0)
   const payload = () => ({ ...f, track, year, amount: f.amount === '' ? null : f.amount })
   const save = async () => { setBusy(true); try { const id = await rpc('save_nomination', { p: payload() }); setF((x) => ({ ...x, id })); await reload(); return id } finally { setBusy(false) } }
@@ -97,7 +104,7 @@ export default function Form({ track, go }) {
         <div className="gbar"><i style={{ width: `${(gs / gmax) * 100}%` }} /></div>
         {cs.map((c) => { const v = f.scores[c.id]; const [rt, rc] = v ? rating(v, c.max_score) : ['', '#9aa7ae']
           return <div className="crt" key={c.id}>
-            <div className="crt-top"><span>{c.label}</span><span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{v ? <span className="rate" style={{ '--rc': rc }}>{rt}</span> : null}<b className="num" dir="ltr">{v ? Math.round(v / (c.max_score / 5)) : '—'}<small className="muted"> / 5</small></b></span></div>
+            <div className="crt-top"><span>{c.label}</span><span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{v ? <span className="rate" style={{ '--rc': rc }}>{rt}</span> : null}<b className="num" dir="ltr">{v ? (c.max_score % 5 === 0 ? Math.round(v / (c.max_score / 5)) : v) : '—'}<small className="muted"> / {c.max_score % 5 === 0 ? 5 : c.max_score}</small></b></span></div>
             <Scale value={v || 0} max={c.max_score} onChange={(n) => setF((x) => ({ ...x, scores: { ...x.scores, [c.id]: n } }))} />
             <button type="button" className="evb" onClick={() => setEvOpen((o) => ({ ...o, [c.id]: !o[c.id] }))}><Icon n={evOpen[c.id] || f.evidence_notes[c.id] ? 'check' : 'plus'} size={14} />الدليل والأمثلة (اختياري)</button>
             {(evOpen[c.id] || f.evidence_notes[c.id]) && <input className="evi" placeholder="اكتب الدليل أو المثال" value={f.evidence_notes[c.id] || ''} onChange={(e) => setF((x) => ({ ...x, evidence_notes: { ...x.evidence_notes, [c.id]: e.target.value } }))} />}
@@ -118,7 +125,7 @@ export default function Form({ track, go }) {
    </div>
 
    <aside className="aside">
-    <div className="card" style={{ textAlign: 'center' }}><div className="muted small">مجموع الدرجات</div><Gauge total={total} />
+    <div className="card" style={{ textAlign: 'center' }}><div className="muted small">مجموع الدرجات</div><Gauge total={total} max={maxTotal} />
       <div className="prog" style={{ marginTop: 8 }}><i style={{ width: `${pct}%` }} /></div><div className="muted small" style={{ marginTop: 4 }}>اكتمال الاستمارة {pct}%</div></div>
     <div className="card">{checks.map(([k, l]) => <div key={k} className={`chk ${done[k] ? 'ok' : ''}`}><span className="cc"><Icon n="check" size={14} stroke={2.5} /></span>{l}</div>)}
       <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>

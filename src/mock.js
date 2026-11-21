@@ -1,18 +1,18 @@
 // وضع المعاينة: بيانات وهمية في الذاكرة بدل Supabase (يُفعَّل ببناء VITE_DEMO=1 فقط)
 const uid = () => crypto.randomUUID()
 const D = (n) => n
-const divs = ['مديرية مسقط', 'مديرية ظفار', 'مديرية الداخلية', 'دائرة خدمة المراجعين', 'المديرية العامة للتطوير والدراسات', 'دائرة نظم المعلومات الجغرافية', 'دائرة الشؤون المالية'].map((name, i) => ({
+const divs = ['المديرية العامة للإسكان والتخطيط العمراني (مسقط)', 'المديرية العامة للإسكان والتخطيط العمراني (ظفار)', 'المديرية العامة للإسكان والتخطيط العمراني (الداخلية)', 'دائرة خدمة المراجعين', 'المديرية العامة للتطوير والدراسات', 'دائرة نظم المعلومات الجغرافية', 'المديرية العامة للشؤون الإدارية والمالية'].map((name, i) => ({
   id: 'd' + i, name, parent_id: null, counted_in_parent: i === 5, governorate: ['مسقط', 'ظفار', 'الداخلية', 'مسقط', 'مسقط', 'مسقط', 'مسقط'][i], is_service: i < 6, active: true }))
 divs[5].parent_id = 'd4'
 const heads = [180, 140, 150, 60, 90, 25, 45]
 const crit = (t, rows) => rows.flatMap(([g, ls], gi) => ls.map((label, li) => ({ track: t, group_title: g, group_ord: gi + 1, label, max_score: 10, active: true })))
-const sc = crit('service', [['جودة وكفاءة تقديم الخدمة (30)', ['دقة إنجاز المعاملات واكتمالها، وخلوها من الأخطاء', 'الإلمام الشامل بأنظمة وإجراءات العمل المحدثة', 'القدرة على تقديم حلول مرنة وبدائل مناسبة تسعد المستفيدين']],
-  ['اللباقة وحسن التعامل (30)', ['الاستقبال الإيجابي والترحيب بالمستفيدين باهتمام', 'القدرة على احتواء المواقف والتعامل مع الملاحظات بهدوء ورقي', 'الوضوح والشفافية والأسلوب الإيجابي في الرد على الاستفسارات']],
-  ['سرعة الإنجاز (20)', ['إنجاز المعاملات ضمن الإطار الزمني المعتمد للخدمة', 'الاستجابة الفورية والتعامل السريع مع الحالات العاجلة']],
-  ['المهنية والاحترافية (20)', ['الالتزام التام بأوقات العمل والمظهر الوظيفي اللائق', 'روح المبادرة، والتعاون الفعال، ونشر الإيجابية بين زملاء العمل']]])
-const ic = crit('initiator', [['الإنجاز خارج نطاق المهام المعتادة (30)', ['إنجاز أعمال إضافية خارج الوصف الوظيفي', 'المبادرة الذاتية دون تكليف مباشر', 'الالتزام بتنفيذ المبادرة ومتابعتها حتى اكتمالها']],
-  ['حل المشكلات والتحسين (30)', ['تحديد مشكلة أو فرصة تحسين بوضوح', 'تقديم حل عملي قابل للتطبيق', 'تحسين الأداء أو تقليل الوقت أو التكلفة بشكل ملموس']],
-  ['العمل الجماعي ونقل المعرفة (20)', ['المشاركة الفعالة في الفرق واللجان', 'التعلم الذاتي ونقل المعرفة للزملاء']], ['الأثر (20)', ['أثر ملموس وقابل للقياس على العمل أو المستفيدين', 'استدامة الأثر أو قابلية تعميم المبادرة']]])
+const sc = crit('service', [['جودة وكفاءة تقديم الخدمة', ['دقة إنجاز المعاملات واكتمالها، وخلوها من الأخطاء', 'الإلمام الشامل بأنظمة وإجراءات العمل المحدثة', 'القدرة على تقديم حلول مرنة وبدائل مناسبة تسعد المستفيدين']],
+  ['اللباقة وحسن التعامل', ['الاستقبال الإيجابي والترحيب بالمستفيدين باهتمام', 'القدرة على احتواء المواقف والتعامل مع الملاحظات بهدوء ورقي', 'الوضوح والشفافية والأسلوب الإيجابي في الرد على الاستفسارات']],
+  ['سرعة الإنجاز', ['إنجاز المعاملات ضمن الإطار الزمني المعتمد للخدمة', 'الاستجابة الفورية والتعامل السريع مع الحالات العاجلة']],
+  ['المهنية والاحترافية', ['الالتزام التام بأوقات العمل والمظهر الوظيفي اللائق', 'روح المبادرة، والتعاون الفعال، ونشر الإيجابية بين زملاء العمل']]])
+const ic = crit('initiator', [['الإنجاز خارج نطاق المهام المعتادة', ['إنجاز أعمال إضافية خارج الوصف الوظيفي', 'المبادرة الذاتية دون تكليف مباشر', 'الالتزام بتنفيذ المبادرة ومتابعتها حتى اكتمالها']],
+  ['حل المشكلات والتحسين', ['تحديد مشكلة أو فرصة تحسين بوضوح', 'تقديم حل عملي قابل للتطبيق', 'تحسين الأداء أو تقليل الوقت أو التكلفة بشكل ملموس']],
+  ['العمل الجماعي ونقل المعرفة', ['المشاركة الفعالة في الفرق واللجان', 'التعلم الذاتي ونقل المعرفة للزملاء']], ['الأثر', ['أثر ملموس وقابل للقياس على العمل أو المستفيدين', 'استدامة الأثر أو قابلية تعميم المبادرة']]])
 const criteria = [...sc, ...ic].map((c, i) => ({ ...c, id: i + 1, ord: i + 1 }))
 const names = ['سالم الحارثي', 'مريم البلوشي', 'خالد الرواحي', 'أمل السعدي', 'يوسف الكندي', 'هدى المعمري', 'ناصر الهنائي', 'فاطمة الشكيلي', 'سعيد العامري', 'ليلى البوسعيدي']
 const employees = names.map((name, i) => ({ emp_no: String(1001 + i), name, title: 'أخصائي', division_id: divs[i % 4].id }))
@@ -30,13 +30,13 @@ const db = {
   nominations: [
     mkNom({ track: 'service', period: 1, division_id: 'd0', emp_no: '1001', status: 'honored', total: 92, scores: score(9), honored_on: '2026-04-30', paid_on: '2026-04-20', amount: 300 }),
     mkNom({ track: 'service', period: 1, division_id: 'd1', emp_no: '1002', status: 'approved', total: 88, scores: score(9), amount: 300 }),
-    mkNom({ track: 'service', period: 1, division_id: 'd2', emp_no: '1003', status: 'recommended', total: 85, scores: score(8), amount: 300 }),
+    mkNom({ track: 'service', period: 1, division_id: 'd2', emp_no: '1003', status: 'review', total: 85, scores: score(8), amount: 300 }),
     mkNom({ track: 'service', period: 2, division_id: 'd0', emp_no: '1005', status: 'sent', total: 90, scores: score(9) }),
     mkNom({ track: 'service', period: 2, division_id: 'd0', emp_no: '1009', status: 'needs_info', total: 70, scores: score(7), needs_info_reason: 'يرجى إرفاق شاهد إضافي' }),
     mkNom({ track: 'initiator', period: 1, division_id: 'd0', emp_no: '1005', status: 'approved', initiative_title: 'أتمتة طلبات الفحص', amount: 400, total: 86 }),
-    mkNom({ track: 'initiator', period: 1, division_id: 'd1', emp_no: '1002', status: 'recommended', initiative_title: 'دليل الإجراءات المبسط', amount: 250, total: 80 }),
+    mkNom({ track: 'initiator', period: 1, division_id: 'd1', emp_no: '1002', status: 'review', initiative_title: 'دليل الإجراءات المبسط', amount: 250, total: 80 }),
     mkNom({ track: 'initiator', period: 2, division_id: 'd0', emp_no: '1001', status: 'draft', initiative_title: 'مبادرة تجريبية', amount: 150 }),
-    mkNom({ track: 'innovator', period: 1, rank: 1, division_id: 'd2', emp_no: '1003', status: 'recommended', amount: 500, idea_title: 'نظام تنبيه ذكي', idea_no: 'NB-102', approved_on: '2026-06-10' }),
+    mkNom({ track: 'innovator', period: 1, rank: 1, division_id: 'd2', emp_no: '1003', status: 'review', amount: 500, idea_title: 'نظام تنبيه ذكي', idea_no: 'NB-102', approved_on: '2026-06-10' }),
   ],
 }
 const role = new URLSearchParams(location.search).get('role') || 'ejada'
@@ -59,10 +59,10 @@ const rpcs = {
     if (p.id) { Object.assign(db.nominations.find((n) => n.id === p.id), { ...p, emp_name: e.name, total }); return p.id }
     const n = mkNom({ ...p, division_id: me().division_id, total, emp_no: e.emp_no }); db.nominations.unshift(n); log(n, 'save_draft'); return n.id },
   transition_nomination: ({ p_id, p_action, p_note, p_date }) => { const n = db.nominations.find((x) => x.id === p_id); const from = n.status
-    const to = { submit: 'sent', receive: 'review', recommend: 'recommended', needs_info: 'needs_info', approve: 'approved', to_pay: 'to_pay', pay: 'paid', honor: 'honored' }[p_action]
+    const to = { submit: 'sent', receive: 'review', needs_info: 'needs_info', approve: 'approved', to_pay: 'to_pay', pay: 'paid', honor: 'honored' }[p_action]
     if (p_action === 'needs_info') n.needs_info_reason = p_note; if (p_action === 'pay') n.paid_on = p_date || '2026-11-15'; if (p_action === 'honor') n.honored_on = p_date || '2026-11-15'
     n.status = to; log(n, p_action, from); return n },
-  save_innovator_result: ({ p }) => { const e = db.employees.find((x) => x.emp_no === p.emp_no); db.nominations.unshift(mkNom({ track: 'innovator', year: p.year, period: p.period, rank: p.rank, emp_no: e.emp_no, division_id: p.division_id || e.division_id, status: 'recommended',
+  save_innovator_result: ({ p }) => { const e = db.employees.find((x) => x.emp_no === p.emp_no); db.nominations.unshift(mkNom({ track: 'innovator', year: p.year, period: p.period, rank: p.rank, emp_no: e.emp_no, division_id: p.division_id || e.division_id, status: 'review',
     amount: db.year_settings.find((y) => y.year === p.year).innovator_prizes[p.rank], idea_title: p.idea_title, idea_no: p.idea_no, approved_on: p.approved_on, is_team: p.is_team, team: p.team })); return 'ok' },
   budget_summary: ({ p_year }) => { const a = alloc(p_year); const ys = db.year_settings.find((y) => y.year === p_year); const svc = db.divisions.filter((d) => d.is_service).length; const pool = ys.approved_headcount * 15; const rem = pool - svc * 1200 - 2400
     const hc = a.reduce((s, x) => s + x.headcount, 0); return [{ total_pool: pool, service_total: svc * 1200, innovator_total: 2400, remaining: rem, per_employee: Math.round(rem / hc * 1000) / 1000, included_headcount: hc, approved_headcount: ys.approved_headcount, allocated: a.reduce((s, x) => s + x.allocation, 0), unallocated: 0 }] },
@@ -76,7 +76,7 @@ const rpcs = {
   request_access: () => 'ok', approve_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'approved'; }, reject_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'rejected'; },
   find_conflicts: () => [], resolve_conflict: () => 0, init_year: () => null, close_year: () => null,
   cycle_status: ({ p_year }) => db.cycles.filter((c) => c.year === p_year).map((c) => { const ns = db.nominations.filter((n) => n.track === c.track && n.period === c.period && n.year === p_year); const ap = ns.filter((n) => ['approved', 'to_pay', 'paid', 'honored'].includes(n.status)).length
-    const ex = c.track === 'service' ? 6 : c.track === 'innovator' ? 3 : 0; const pn = ns.filter((n) => ['sent', 'review', 'recommended'].includes(n.status)).length
+    const ex = c.track === 'service' ? 6 : c.track === 'innovator' ? 3 : 0; const pn = ns.filter((n) => ['sent', 'review'].includes(n.status)).length
     return { cycle_id: c.id, track: c.track, period: c.period, is_open: c.is_open, closes_on: c.closes_on, state: c.closes_on && c.closes_on > '2026-11-15' ? 'not_ended' : ap === ex && ex ? 'complete' : pn ? 'awaiting' : 'incomplete', approved_count: ap, expected: ex, pending: pn } }),
   approve_publish: ({ p_year }) => { db.publish_versions.unshift({ id: uid(), year: p_year, approved_by: me().full_name, approved_at: new Date().toISOString(), rows: db.nominations.filter((n) => n.status === 'honored').map((n) => ({ name: n.emp_name, division: db.divisions.find((d) => d.id === n.division_id).name, track: n.track, period: n.period, rank: n.rank })) }); return 'ok' },
 }

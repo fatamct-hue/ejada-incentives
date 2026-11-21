@@ -8,7 +8,7 @@ function Bars({ labels, series }) {
     {series.map((s, j) => <div className="bcol" key={j} style={{ height: `${Math.max(3, (s.v[i] / max) * 100)}%`, background: s.c, '--i': i * series.length + j }}><b className="num">{s.v[i]}</b></div>)}</div></div>)}</div>
     <div className="blabs">{labels.map((l) => <span key={l}>{l}</span>)}</div></>
 }
-const DCOL = { sent: '#6f92b4', review: '#0f446c', recommended: '#00827a', approved: '#43b987', to_pay: '#aa7f67', paid: '#e4c6ac', honored: '#00253e', needs_info: '#d9a441' }
+const DCOL = { sent: '#6f92b4', review: '#0f446c', approved: '#43b987', to_pay: '#aa7f67', paid: '#e4c6ac', honored: '#00253e', needs_info: '#d9a441' }
 function Donut({ parts, total }) {
   const R = 54, C = 2 * Math.PI * R; let off = 0
   return <svg className="donut" viewBox="0 0 150 150" role="img"><circle cx="75" cy="75" r={R} stroke="#eceae4" />
@@ -27,7 +27,7 @@ export default function Dashboard() {
   const tr = (t, p) => ns.filter((n) => n.track === t && n.period === p && APPROVED.includes(n.status)).length
   const follow = divisions.filter((d) => d.active && (!fl.div || d.id === fl.div)).map((d) => {
     const mine = noms.filter((n) => n.year === year && n.division_id === d.id)
-    return { d, started: mine.length, sent: mine.filter((n) => n.status !== 'draft').length, wait: mine.filter((n) => ['sent', 'review', 'recommended'].includes(n.status)).length, back: mine.filter((n) => n.status === 'needs_info').length }
+    return { d, started: mine.length, sent: mine.filter((n) => n.status !== 'draft').length, wait: mine.filter((n) => ['sent', 'review'].includes(n.status)).length, back: mine.filter((n) => n.status === 'needs_info').length }
   })
   const alerts = follow.filter((x) => x.sent === 0).length
   return <>
@@ -36,7 +36,7 @@ export default function Dashboard() {
       <select value={fl.period} onChange={(e) => setFl({ ...fl, period: e.target.value })}><option value="">كل الدورات</option>{[1, 2, 3, 4].map((p) => <option key={p} value={p}>الدورة {p}</option>)}</select>
       <select value={fl.gov} onChange={(e) => setFl({ ...fl, gov: e.target.value })}><option value="">كل المحافظات</option>{govs.map((g) => <option key={g}>{g}</option>)}</select>
       <select value={fl.div} onChange={(e) => setFl({ ...fl, div: e.target.value })}><option value="">كل التقسيمات</option>{divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
-    <div className="grid g4 stg" style={{ marginTop: 14 }}><Kpi i={0} icon="send" c="#0f446c" l="ترشيحات مرسلة" v={ns.length} /><Kpi i={1} icon="clock" c="#aa7f67" l="قيد المراجعة" v={cnt((n) => ['sent', 'review', 'recommended'].includes(n.status))} />
+    <div className="grid g4 stg" style={{ marginTop: 14 }}><Kpi i={0} icon="send" c="#0f446c" l="ترشيحات مرسلة" v={ns.length} /><Kpi i={1} icon="clock" c="#aa7f67" l="قيد المراجعة" v={cnt((n) => ['sent', 'review'].includes(n.status))} />
       <Kpi i={2} icon="check" c="#43b987" l="معتمدة" v={cnt((n) => APPROVED.includes(n.status))} /><Kpi i={3} icon="trophy" c="#00253e" l="تم تكريمهم" v={cnt((n) => n.status === 'honored')} /></div>
     <div className="grid g2 stg" style={{ marginTop: 14 }}>
       <div className="card"><h3>مقارنة الأرباع — المعتمدون</h3><Bars labels={['ر1', 'ر2', 'ر3', 'ر4']} series={[{ c: TRACKS.service.c, v: q.map((p) => tr('service', p)) }, { c: TRACKS.initiator.c, v: q.map((p) => tr('initiator', p)) }]} />

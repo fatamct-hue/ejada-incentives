@@ -8,10 +8,10 @@ export default function ApprovalHome({ go }) {
   const { me, year, noms, divisions, divName } = useApp()
   const [sel, setSel] = useState(null)
   const yr = useMemo(() => noms.filter((n) => n.year === year && n.track !== 'initiator'), [noms, year])
-  const wait = yr.filter((n) => n.status === 'recommended')
+  const wait = yr.filter((n) => n.status === 'review')
   const svcDivs = divisions.filter((d) => d.active && d.is_service)
   const won = (d, q) => yr.find((n) => n.track === 'service' && n.division_id === d.id && n.period === q && APPROVED.includes(n.status))
-  const pend = (d, q) => yr.find((n) => n.track === 'service' && n.division_id === d.id && n.period === q && ['sent', 'review', 'recommended'].includes(n.status))
+  const pend = (d, q) => yr.find((n) => n.track === 'service' && n.division_id === d.id && n.period === q && ['sent', 'review'].includes(n.status))
   const inv = yr.filter((n) => n.track === 'innovator')
   return <>
     <RoleHero role="dev" name={me.full_name} stat={[wait.length, wait.length === 1 ? 'ترشيح بانتظار اعتمادك' : 'ترشيحات بانتظار اعتمادك']} />
@@ -26,7 +26,7 @@ export default function ApprovalHome({ go }) {
         <td><button className="btn s g" onClick={() => setSel(n)}>مراجعة واعتماد</button></td></tr>)}</tbody></table> : <div className="empty"><Icon n="check" size={26} />لا توجد ترشيحات بانتظار اعتمادك.</div>}</div>
     <Sec t="خدمة المستفيدين — فائز كل جهة في كل ربع" />
     <div className="card tw"><table className="matrix"><thead><tr><th>الجهة</th>{[1, 2, 3, 4].map((q) => <th key={q}>{periodName('service', q)}</th>)}</tr></thead><tbody>
-      {svcDivs.map((d) => <tr key={d.id}><td>{d.name.replace('المديرية العامة للإسكان والتخطيط العمراني بمحافظة ', 'مديرية ')}</td>{[1, 2, 3, 4].map((q) => { const w = won(d, q), p = pend(d, q)
+      {svcDivs.map((d) => <tr key={d.id}><td>{d.name}</td>{[1, 2, 3, 4].map((q) => { const w = won(d, q), p = pend(d, q)
         return <td key={q}>{w ? <span className="cell win" title={w.emp_name}><Icon n="trophy" size={14} />{w.emp_name}</span> : p ? <span className="cell pend"><Icon n="clock" size={14} />بانتظار</span> : <span className="cell none">—</span>}</td> })}</tr>)}</tbody></table></div>
     <Sec t="المبتكر — النتائج" /><div className="grid g3 stg">{[1, 2].flatMap((h) => [1, 2, 3].map((r) => ({ h, r }))).map(({ h, r }, i) => { const n = inv.find((x) => x.period === h && x.rank === r)
       return <div key={`${h}-${r}`} className="card lift" style={{ '--i': i }}><div className="muted small">{periodName('innovator', h)} · المركز {r}</div>{n ? <><b>{n.emp_name}</b><div className="muted small">{n.idea_title}</div><Pill s={n.status} /></> : <span className="muted">لم تُدخل بعد</span>}</div> })}</div>

@@ -17,10 +17,9 @@ export default function NomModal({ nom, onClose }) {
   const open = async (f) => { const { data } = await sb.storage.from('evidence').createSignedUrl(f.path, 120); if (data) window.open(data.signedUrl) }
   const T = TRACKS[nom.track]; const s = nom.status; const r = me.role; const ap = approverOf(nom.track)
   const btns = []
-  if (r === 'ejada' && s === 'sent') btns.push(['receive', 'استلام وبدء المراجعة', 't'])
-  if (r === 'ejada' && ['sent', 'review'].includes(s)) btns.push(['recommend', 'توصية', 'g'])
-  if ((r === 'ejada' || r === ap) && ['sent', 'review', 'recommended'].includes(s)) btns.push(['needs_info', 'إعادة للاستكمال', 'd', true])
-  if (r === ap && s === 'recommended') btns.push(['approve', 'اعتماد', 'g'])
+  if (r === 'ejada' && s === 'sent') btns.push(['receive', 'استلام الترشيح', 't'])
+  if ((r === 'ejada' || r === ap) && ['sent', 'review'].includes(s)) btns.push(['needs_info', 'إعادة للاستكمال', 'd', true])
+  if (r === ap && s === 'review') btns.push(['approve', 'اعتماد', 'g'])
   if (r === 'admin_fin' && s === 'approved') btns.push(['to_pay', 'إحالة للصرف', 't'])
   if (r === 'admin_fin' && s === 'to_pay') btns.push(['pay', 'تسجيل الصرف', 'g'])
   if (r === 'ejada' && s === 'paid') btns.push(['honor', 'تسجيل التكريم', 'g'])

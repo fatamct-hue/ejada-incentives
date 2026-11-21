@@ -3,7 +3,7 @@ import { sb } from './supabase'
 import { asset, ROLES, shortName } from './lib'
 import Icon from './Icon'
 
-const REQ_ROLES = [['dg', 'مدير عام / مسؤول أعلى لتقسيم'], ['ejada', 'فريق الإجادة المؤسسية'], ['dev', 'المديرية العامة للتطوير والدراسات'], ['admin_fin', 'المديرية العامة للشؤون الإدارية والمالية']]
+const REQ_ROLES = [['dg', 'مدير عام / مسؤول أعلى لتقسيم'], ['ejada', 'فريق الإجادة المؤسسية'], ['dev', 'جهة اعتماد: المديرية العامة للتطوير والدراسات (خدمة المستفيدين والمبتكر)'], ['admin_fin', 'جهة اعتماد: المديرية العامة للشؤون الإدارية والمالية (المبادر)']]
 
 function Frame({ children, onSubmit, onClose }) {
   return <div className="authov" onClick={onClose}>
