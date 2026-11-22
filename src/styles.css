@@ -501,3 +501,4 @@ details.viewas[open] summary{margin-bottom:8px}
 .lockcard::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(0,37,62,.035) 0 10px,transparent 10px 20px);pointer-events:none}
 html{scroll-behavior:smooth}
 ::selection{background:rgba(74,214,237,.4)}
+.prevbox{margin-top:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,.7);border:1px dashed var(--teal)}
