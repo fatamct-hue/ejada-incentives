@@ -59,7 +59,7 @@ const rpcs = {
     if (p.id) { Object.assign(db.nominations.find((n) => n.id === p.id), { ...p, emp_name: e.name, total }); return p.id }
     const n = mkNom({ ...p, division_id: me().division_id, total, emp_no: e.emp_no }); db.nominations.unshift(n); log(n, 'save_draft'); return n.id },
   transition_nomination: ({ p_id, p_action, p_note, p_date }) => { const n = db.nominations.find((x) => x.id === p_id); const from = n.status
-    const to = { submit: 'sent', receive: 'review', needs_info: 'needs_info', approve: 'approved', to_pay: 'to_pay', pay: 'paid', honor: 'honored' }[p_action]
+    const to = { submit: 'sent', receive: 'review', needs_info: 'needs_info', approve: 'approved', to_pay: 'to_pay', honor: 'honored' }[p_action]
     if (p_action === 'needs_info') n.needs_info_reason = p_note; if (p_action === 'pay') n.paid_on = p_date || '2026-11-15'; if (p_action === 'honor') n.honored_on = p_date || '2026-11-15'
     n.status = to; log(n, p_action, from); return n },
   save_innovator_result: ({ p }) => { const e = db.employees.find((x) => x.emp_no === p.emp_no); db.nominations.unshift(mkNom({ track: 'innovator', year: p.year, period: p.period, rank: p.rank, emp_no: e.emp_no, division_id: p.division_id || e.division_id, status: 'review',
@@ -72,6 +72,7 @@ const rpcs = {
     const inv = ns.filter((n) => n.track === 'innovator' && ap.includes(n.status)).reduce((s, n) => s + +n.amount, 0); const used = q(1) + q(2) + q(3) + q(4)
     return { division_id: a.division_id, division_name: d.name, headcount: a.headcount, is_service: d.is_service, computed: a.allocation, override: null, allocation: a.allocation, service_amount: d.is_service ? 1200 : 0, innovator_amount: inv, q1: q(1), q2: q(2), q3: q(3), q4: q(4),
       paid: ns.filter((n) => n.track === 'initiator' && ['paid', 'honored'].includes(n.status)).reduce((s, n) => s + +n.amount, 0), unpaid: 0, balance: a.allocation - used, total: a.allocation + (d.is_service ? 1200 : 0) + inv } }),
+  employee_honors: ({ p_emp_no }) => db.nominations.filter((n) => n.emp_no === String(p_emp_no) && ['approved', 'to_pay', 'honored'].includes(n.status)).map((n) => ({ year: n.year, track: n.track, period: n.period, rank: n.rank, status: n.status, amount: n.amount, honored_on: n.honored_on })),
   public_divisions: () => db.divisions.map((d) => ({ id: d.id, name: d.name })),
   request_access: () => 'ok', approve_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'approved'; }, reject_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'rejected'; },
   find_conflicts: () => [], resolve_conflict: () => 0, init_year: () => null, close_year: () => null,

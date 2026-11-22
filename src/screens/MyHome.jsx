@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { useApp, TRACKS, periodName, fmt, fdate, APPROVED, Pill } from '../lib'
 import Icon, { TRACK_ICON } from '../Icon'
 import { CountUp } from '../motion'
+import { useEffect as useEff } from 'react'
 import NomModal from './NomModal'
 
 export default function MyHome({ go }) {
   const { me, year, ys, noms, divisions, divName, years } = useApp()
-  const [sel, setSel] = useState(null)
+  const [sel, setSel] = useState(null); const [bud, setBud] = useState(null)
+  const { rpc } = useApp(); useEff(() => { rpc('budget_table', { p_year: year }).then((r) => setBud(r?.[0] || null)).catch(() => {}) }, [year])
   const div = divisions.find((d) => d.id === me.division_id)
   const mine = noms.filter((n) => n.division_id === me.division_id)
   const yr = mine.filter((n) => n.year === year)
@@ -28,6 +30,10 @@ export default function MyHome({ go }) {
           {div?.is_service && <button className="btn o" style={{ background: 'transparent', color: '#fff', boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,.45)' }} onClick={() => go('service')}><Icon n="service" size={18} />ترشيح خدمة المستفيدين</button>}</div></div>
       <div className="cubes">{['trophy', 'service', 'spark'].map((k, i) => <div className="cube" key={k} style={{ '--d': `${i * -1.4}s` }}><Icon n={k} size={34} stroke={1.5} /></div>)}</div></div>
 
+    {bud && <><div className="sec"><h2>مخصص المبادر المتاح لتقسيمك</h2></div>
+      <div className="budbanner"><div><div className="bl">المتاح الآن</div><div className="bv num"><CountUp value={fmt(bud.balance)} /><small> ر.ع</small></div></div>
+        <div className="bbar"><div className="prog"><i style={{ width: `${Math.min(100, ((bud.allocation - bud.balance) / (bud.allocation || 1)) * 100)}%` }} /></div><div className="small">المخصص السنوي {fmt(bud.allocation)} ر.ع · المعتمد {fmt(bud.allocation - bud.balance)} ر.ع</div></div>
+        <div className="blim"><Icon n="shield" size={16} />مبلغ المبادر للموظف الواحد: من <b className="num">{fmt(ys?.initiator_min ?? 50)}</b> إلى <b className="num">{fmt(ys?.initiator_max ?? 300)}</b> ر.ع</div></div></>}
     <div className="sec"><h2>حصيلة التكريم في {year}</h2></div>
     <div className="honor stg">
       <div className="card kpi hbig" style={{ '--i': 0 }}><span className="kic"><Icon n="trophy" size={24} /></span><div className="l">مُكرَّمون هذه السنة</div><div className="v num"><CountUp value={honored.length} /></div><div className="s">{approved.length} معتمد · {pending.length} قيد الاعتماد</div></div>

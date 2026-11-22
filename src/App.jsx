@@ -18,13 +18,15 @@ import Reports from './screens/Reports'
 import Settings from './screens/Settings'
 import Criteria from './screens/Criteria'
 import Employees from './screens/Employees'
+import Payroll from './screens/Payroll'
 
 const NAV = [
   ['home', 'home', { dg: 'الرئيسية', ejada: 'لوحة القيادة', dev: 'لوحة الاعتماد', admin_fin: 'لوحة الصرف' }],
   ['dg', 'unit', { dg: 'ترشيحاتي' }],
   ['service', 'service', { dg: 'استمارة خدمة المستفيدين' }],
   ['initiator', 'spark', { dg: 'استمارة المبادر' }],
-  ['review', 'review', { ejada: 'استلام الترشيحات ومراجعتها', dev: 'اعتماد الترشيحات', admin_fin: 'الاعتماد والصرف' }],
+  ['review', 'review', { ejada: 'استلام الترشيحات ومراجعتها', dev: 'اعتماد الترشيحات', admin_fin: 'الاعتماد والإحالة' }],
+  ['payroll', 'coin', { admin_fin: 'كشف الإحالة للصرف', ejada: 'كشوف الإحالة للصرف' }],
   ['innovator', 'bulb', { ejada: 'نتائج المبتكر', dev: 'نتائج المبتكر' }],
   ['employees', 'users', { ejada: 'سجل الموظفين', admin_fin: 'سجل الموظفين' }],
   ['criteria', 'form', { ejada: 'معايير التقييم', dev: 'معايير التقييم', admin_fin: 'معايير التقييم' }],
@@ -77,7 +79,7 @@ function Shell() {
   const bellTo = me.role === 'dg' ? 'dg' : 'review'
   useEffect(() => { document.title = `${cur[1]} · منصة حوافز الإجادة المؤسسية` }, [cur[1]])
   const initials = (me.full_name || '؟').trim().split(/\s+/).map((w) => w.replace(/^ال/, '')).filter(Boolean).slice(0, 2).map((w) => w[0]).join('')
-  const S = { home: { dg: MyHome, ejada: CommandHome, dev: ApprovalHome, admin_fin: FinanceHome }[me.role], dg: DG, service: Form, initiator: Form, innovator: Innovator, dash: Dashboard, review: Review, budget: Budget, cycles: Cycles, reports: Reports, settings: Settings, criteria: Criteria, employees: Employees }[cur[0]]
+  const S = { home: { dg: MyHome, ejada: CommandHome, dev: ApprovalHome, admin_fin: FinanceHome }[me.role], dg: DG, service: Form, initiator: Form, innovator: Innovator, dash: Dashboard, review: Review, budget: Budget, cycles: Cycles, reports: Reports, settings: Settings, criteria: Criteria, employees: Employees, payroll: Payroll }[cur[0]]
   return <div className="app">
     {open && <div className="scrim" onClick={() => setOpen(false)} />}
     <aside className={`side ${open ? 'open' : ''}`}>

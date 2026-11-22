@@ -13,7 +13,7 @@ export default function FinanceHome({ go }) {
   const lanes = [
     ['wait', 'بانتظار اعتمادي (المبادر)', 'review', yr.filter((n) => n.track === 'initiator' && n.status === 'review'), '#0f446c'],
     ['appr', 'معتمدة بانتظار الإحالة للصرف', 'check', yr.filter((n) => n.status === 'approved'), '#43b987'],
-    ['pay', 'محالة بانتظار تسجيل الصرف', 'coin', yr.filter((n) => n.status === 'to_pay'), '#aa7f67'],
+    ['pay', 'أُحيلت للصرف (بانتظار التكريم)', 'coin', yr.filter((n) => n.status === 'to_pay'), '#aa7f67'],
   ]
   const todo = lanes.reduce((s, l) => s + l[3].length, 0)
   const top = [...rows].sort((a, b) => b.allocation - a.allocation).slice(0, 10)
@@ -22,7 +22,7 @@ export default function FinanceHome({ go }) {
     <div className="grid g4 stg" style={{ marginTop: 14 }}>
       <Kpi i={0} icon="coin" c="#aa7f67" l="إجمالي مخصصات المبادر" v={fmt(sum('allocation'))} s="ر.ع" />
       <Kpi i={1} icon="check" c="#43b987" l="المعتمد" v={fmt(sum('q1') + sum('q2') + sum('q3') + sum('q4'))} s="ر.ع" />
-      <Kpi i={2} icon="download" c="#0f446c" l="المصروف فعلياً" v={fmt(sum('paid'))} s="ر.ع" />
+      <Kpi i={2} icon="download" c="#0f446c" l="المحال للصرف" v={fmt(sum('paid'))} s="ر.ع" />
       <Kpi i={3} icon="shield" c="#00253e" l="الرصيد المتاح" v={fmt(sum('balance'))} s="ر.ع" /></div>
     <Sec t="مسار الصرف" /><div className="grid g3 stg">{lanes.map(([k, l, ic, list, col], i) => <div className="card lane" key={k} style={{ '--c': col, '--i': i }}>
       <div className="lh"><Icon n={ic} size={20} /><b>{l}</b><span className="lc num">{list.length}</span></div>
