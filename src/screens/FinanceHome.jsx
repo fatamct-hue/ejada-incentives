@@ -24,11 +24,11 @@ export default function FinanceHome({ go }) {
       <Kpi i={1} icon="check" c="#43b987" l="المعتمد" v={fmt(sum('q1') + sum('q2') + sum('q3') + sum('q4'))} s="ر.ع" />
       <Kpi i={2} icon="download" c="#0f446c" l="المحال للصرف" v={fmt(sum('paid'))} s="ر.ع" />
       <Kpi i={3} icon="shield" c="#00253e" l="الرصيد المتاح" v={fmt(sum('balance'))} s="ر.ع" /></div>
-    <Sec t="مسار الصرف" /><div className="grid g3 stg">{lanes.map(([k, l, ic, list, col], i) => <div className="card lane" key={k} style={{ '--c': col, '--i': i }}>
+    <Sec t="مسار الاعتماد والصرف"><button className="btn s t" onClick={() => go('payroll')}><Icon n="coin" size={15} />كشف الإحالة للصرف</button></Sec><div className="grid g3 stg">{lanes.map(([k, l, ic, list, col], i) => <div className="card lane" key={k} style={{ '--c': col, '--i': i, maxHeight: 420, overflow: 'auto' }}>
       <div className="lh"><Icon n={ic} size={20} /><b>{l}</b><span className="lc num">{list.length}</span></div>
-      {list.slice(0, 5).map((n) => <button key={n.id} className="li" onClick={() => setSel(n)}><span>{n.emp_name}</span><span className="muted small">{divName(n.division_id)}</span><b className="num">{fmt(n.amount)}</b></button>)}
+      {list.map((n) => <button key={n.id} className="li" onClick={() => setSel(n)}><span>{n.emp_name}</span><span className="muted small">{divName(n.division_id)}</span><b className="num">{fmt(n.amount)}</b></button>)}
       {!list.length && <div className="muted small" style={{ padding: '8px 0' }}>لا يوجد.</div>}
-      {list.length > 5 && <button className="btn s o" onClick={() => go('review')}>عرض الكل ({list.length})</button>}</div>)}</div>
+</div>)}</div>
     <Sec t="استهلاك المخصصات"><button className="btn s o" onClick={() => go('budget')}>التفاصيل الكاملة</button></Sec>
     <div className="card">{top.length ? top.map((r) => { const used = r.q1 + r.q2 + r.q3 + r.q4; const pct = r.allocation ? Math.min(100, (used / r.allocation) * 100) : 0
       return <div className="ur" key={r.division_id}><span className="un">{r.division_name}</span><span className="ub"><i style={{ width: `${pct}%` }} /></span><span className="num uv">{fmt(used)} / {fmt(r.allocation)}</span></div> }) : <span className="muted">أدخل العدد المعتمد وأعداد التقسيمات لتظهر المخصصات.</span>}</div>

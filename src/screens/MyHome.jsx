@@ -14,7 +14,7 @@ export default function MyHome({ go }) {
   const yr = mine.filter((n) => n.year === year)
   const honored = yr.filter((n) => n.status === 'honored')
   const approved = yr.filter((n) => APPROVED.includes(n.status))
-  const pending = yr.filter((n) => ['sent', 'review'].includes(n.status))
+  const pending = yr.filter((n) => n.status === 'review')
   const back = yr.filter((n) => n.status === 'needs_info'); const drafts = yr.filter((n) => n.status === 'draft')
   const per = (t) => ({ h: honored.filter((n) => n.track === t).length, a: approved.filter((n) => n.track === t).length })
   const byYear = years.map((y) => ({ y: y.year, c: mine.filter((n) => n.year === y.year && n.status === 'honored').length }))
@@ -30,6 +30,9 @@ export default function MyHome({ go }) {
           {div?.is_service && <button className="btn o" style={{ background: 'transparent', color: '#fff', boxShadow: 'inset 0 0 0 1.5px rgba(255,255,255,.45)' }} onClick={() => go('service')}><Icon n="service" size={18} />ترشيح خدمة المستفيدين</button>}</div></div>
       <div className="cubes">{['trophy', 'service', 'spark'].map((k, i) => <div className="cube" key={k} style={{ '--d': `${i * -1.4}s` }}><Icon n={k} size={34} stroke={1.5} /></div>)}</div></div>
 
+    {(back.length > 0 || drafts.length > 0) && <><div className="sec"><h2>تحتاج استكمالاً</h2></div><div className="card tw"><table><thead><tr><th>الموظف</th><th>المسار</th><th>الدورة</th><th>الحالة</th><th>السبب</th><th /></tr></thead><tbody>
+      {[...back, ...drafts].map((n) => <tr key={n.id}><td>{n.emp_name}</td><td>{TRACKS[n.track].short}</td><td>{periodName(n.track, n.period)}</td><td><Pill s={n.status} /></td><td className="small">{n.needs_info_reason || '—'}</td>
+        <td><button className="btn s t" onClick={() => { sessionStorage.setItem('edit', n.id); go(n.track) }}>استكمال</button></td></tr>)}</tbody></table></div></>}
     {bud && <><div className="sec"><h2>مخصص المبادر المتاح لتقسيمك</h2></div>
       <div className="budbanner"><div><div className="bl">المتاح الآن</div><div className="bv num"><CountUp value={fmt(bud.balance)} /><small> ر.ع</small></div></div>
         <div className="bbar"><div className="prog"><i style={{ width: `${Math.min(100, ((bud.allocation - bud.balance) / (bud.allocation || 1)) * 100)}%` }} /></div><div className="small">المخصص السنوي {fmt(bud.allocation)} ر.ع · المعتمد {fmt(bud.allocation - bud.balance)} ر.ع</div></div>

@@ -7,13 +7,10 @@ import CommandHome from './screens/CommandHome'
 import ApprovalHome from './screens/ApprovalHome'
 import FinanceHome from './screens/FinanceHome'
 import MyHome from './screens/MyHome'
-import DG from './screens/DG'
 import Form from './screens/Form'
 import Innovator from './screens/Innovator'
-import Dashboard from './screens/Dashboard'
 import Review from './screens/Review'
 import Budget from './screens/Budget'
-import Cycles from './screens/Cycles'
 import Reports from './screens/Reports'
 import Settings from './screens/Settings'
 import Criteria from './screens/Criteria'
@@ -21,19 +18,16 @@ import Employees from './screens/Employees'
 import Payroll from './screens/Payroll'
 
 const NAV = [
-  ['home', 'home', { dg: 'الرئيسية', ejada: 'لوحة القيادة', dev: 'لوحة الاعتماد', admin_fin: 'لوحة الصرف' }],
-  ['dg', 'unit', { dg: 'ترشيحاتي' }],
+  ['home', 'home', { dg: 'الرئيسية', ejada: 'المؤشرات', dev: 'الاعتماد', admin_fin: 'الاعتماد والصرف' }],
   ['service', 'service', { dg: 'استمارة خدمة المستفيدين' }],
   ['initiator', 'spark', { dg: 'استمارة المبادر' }],
-  ['review', 'review', { ejada: 'استلام الترشيحات ومراجعتها', dev: 'اعتماد الترشيحات', admin_fin: 'الاعتماد والإحالة' }],
-  ['payroll', 'coin', { admin_fin: 'كشف الإحالة للصرف', ejada: 'كشوف الإحالة للصرف' }],
-  ['innovator', 'bulb', { ejada: 'نتائج المبتكر', dev: 'نتائج المبتكر' }],
-  ['employees', 'users', { ejada: 'سجل الموظفين', admin_fin: 'سجل الموظفين' }],
-  ['criteria', 'form', { ejada: 'معايير التقييم', dev: 'معايير التقييم', admin_fin: 'معايير التقييم' }],
-  ['dash', 'dash', { ejada: 'المتابعة والتحليل', dev: 'المتابعة والتحليل', admin_fin: 'المتابعة والتحليل' }],
-  ['budget', 'coin', { dg: 'ميزانيتي', ejada: 'الميزانية والمخصصات', admin_fin: 'الميزانية والمخصصات' }],
-  ['cycles', 'cycle', { ejada: 'الدورات والإقفال' }],
-  ['reports', 'report', { ejada: 'القوائم والتقارير', dev: 'القوائم والتقارير', admin_fin: 'التقارير' }],
+  ['review', 'review', { ejada: 'متابعة الترشيحات' }],
+  ['payroll', 'coin', { admin_fin: 'كشف الإحالة للصرف' }],
+  ['innovator', 'bulb', { ejada: 'نتائج المبتكر' }],
+  ['budget', 'coin', { ejada: 'الميزانية', admin_fin: 'الميزانية والمخصصات' }],
+  ['employees', 'users', { admin_fin: 'سجل الموظفين' }],
+  ['criteria', 'form', { dev: 'معايير التقييم', admin_fin: 'معايير التقييم' }],
+  ['reports', 'report', { ejada: 'التقارير والتكريم' }],
   ['settings', 'gear', { ejada: 'الإعدادات' }],
 ]
 
@@ -74,12 +68,12 @@ function Shell() {
   const go = (p) => { location.hash = p; setOpen(false) }
   const cur = nav.find((n) => n[0] === page && !n[4]) || nav[0]
   const yrN = noms.filter((n) => n.year === year)
-  const bell = { dg: yrN.filter((n) => n.status === 'needs_info').length, ejada: yrN.filter((n) => n.status === 'sent').length + pendReq,
-    dev: yrN.filter((n) => n.status === 'review' && n.track !== 'initiator').length, admin_fin: yrN.filter((n) => (n.track === 'initiator' && n.status === 'review') || n.status === 'approved' || n.status === 'to_pay').length }[me.role] || 0
-  const bellTo = me.role === 'dg' ? 'dg' : 'review'
+  const bell = { dg: yrN.filter((n) => n.status === 'needs_info').length, ejada: yrN.filter((n) => n.status === 'to_pay').length + pendReq,
+    dev: yrN.filter((n) => n.status === 'review' && n.track !== 'initiator').length, admin_fin: yrN.filter((n) => (n.track === 'initiator' && n.status === 'review') || n.status === 'approved').length }[me.role] || 0
+  const bellTo = me.role === 'ejada' ? (pendReq ? 'settings' : 'review') : 'home'
   useEffect(() => { document.title = `${cur[1]} · منصة حوافز الإجادة المؤسسية` }, [cur[1]])
   const initials = (me.full_name || '؟').trim().split(/\s+/).map((w) => w.replace(/^ال/, '')).filter(Boolean).slice(0, 2).map((w) => w[0]).join('')
-  const S = { home: { dg: MyHome, ejada: CommandHome, dev: ApprovalHome, admin_fin: FinanceHome }[me.role], dg: DG, service: Form, initiator: Form, innovator: Innovator, dash: Dashboard, review: Review, budget: Budget, cycles: Cycles, reports: Reports, settings: Settings, criteria: Criteria, employees: Employees, payroll: Payroll }[cur[0]]
+  const S = { home: { dg: MyHome, ejada: CommandHome, dev: ApprovalHome, admin_fin: FinanceHome }[me.role], service: Form, initiator: Form, innovator: Innovator, review: Review, budget: Budget, reports: Reports, settings: Settings, criteria: Criteria, employees: Employees, payroll: Payroll }[cur[0]]
   return <div className="app">
     {open && <div className="scrim" onClick={() => setOpen(false)} />}
     <aside className={`side ${open ? 'open' : ''}`}>
