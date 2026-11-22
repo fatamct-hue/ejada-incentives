@@ -24,10 +24,18 @@ begin
          titles[1 + s % 6], did, true
   from (select d.id did, (row_number() over (order by d.name, k))::int s from divisions d cross join generate_series(1, 6) k where d.active) x;
 
-  create temp table _e on commit drop as select e.emp_no, e.name, e.title, e.division_id, (row_number() over (partition by e.division_id order by e.emp_no))::int k from employees e where e.is_demo;
-  create temp table _sv on commit drop as select id, name, (row_number() over (order by name))::int sr from divisions where active and is_service;
-  create temp table _bd on commit drop as select id, name, (row_number() over (order by name))::int ir from divisions where active and not counted_in_parent;
-  create temp table _sc on commit drop as
+  create temp table if not exists _e (emp_no text, name text, title text, division_id uuid, k int);
+  delete from _e;
+  insert into _e select e.emp_no, e.name, e.title, e.division_id, (row_number() over (partition by e.division_id order by e.emp_no))::int from employees e where e.is_demo;
+  create temp table if not exists _sv (id uuid, name text, sr int);
+  delete from _sv;
+  insert into _sv select id, name, (row_number() over (order by name))::int from divisions where active and is_service;
+  create temp table if not exists _bd (id uuid, name text, ir int);
+  delete from _bd;
+  insert into _bd select id, name, (row_number() over (order by name))::int from divisions where active and not counted_in_parent;
+  create temp table if not exists _sc (emp_no text, track text, scores jsonb, total int);
+  delete from _sc;
+  insert into _sc
     select e.emp_no, t.track, jsonb_object_agg(c.id::text, v.v) scores, sum(v.v)::int total
     from _e e cross join (values ('service'), ('initiator')) t(track)
     join criteria c on c.track = t.track::track_kind and c.active
@@ -35,7 +43,8 @@ begin
     group by e.emp_no, t.track;
 
   -- 2) خطة الترشيحات
-  create temp table _plan (track track_kind, period int, division_id uuid, k int, status nom_status, amount numeric, title text, rk int, idea text, ideano text, team boolean default false, why text) on commit drop;
+  create temp table if not exists _plan (track track_kind, period int, division_id uuid, k int, status nom_status, amount numeric, title text, rk int, idea text, ideano text, team boolean default false, why text);
+  delete from _plan;
   insert into _plan (track, period, division_id, k, status) select 'service'::track_kind, 1, sv.id, 1, st_s1[sv.sr::int]::nom_status from _sv sv;
   insert into _plan (track, period, division_id, k, status, why) select 'service'::track_kind, 2, sv.id, 2, st_s2[sv.sr::int]::nom_status, case when st_s2[sv.sr::int] = 'needs_info' then 'يرجى إرفاق شاهد إضافي يدعم المسوغات' end from _sv sv;
   insert into _plan (track, period, division_id, k, status, amount, title)
