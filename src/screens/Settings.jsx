@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Cycles from './Cycles'
 import * as XLSX from 'xlsx'
 import { sb } from '../supabase'
 import { useApp, Sec, ROLES, shortName, fdate, fmt as fmtn } from '../lib'
@@ -46,7 +47,7 @@ export default function Settings() {
     await sb.from('division_years').upsert({ division_id: data.id, year, headcount: +nd.headcount || 0 }); setNd({ name: '', parent_id: '', counted_in_parent: false, governorate: '', is_service: false, headcount: '' }); say('أُضيف التقسيم'); reload()
   }
   return <>
-    <div className="tabs">{[['req', `طلبات الانضمام${pending.length ? ' (' + pending.length + ')' : ''}`], ['year', 'السنة'], ['div', 'التقسيمات'], ['users', 'المستخدمون'], ['emp', 'سجل الموظفين']].map(([k, l]) => <button key={k} className={`btn s ${tab === k ? '' : 'o'}`} onClick={() => setTab(k)}>{l}</button>)}</div>
+    <div className="tabs">{[['req', `طلبات الانضمام${pending.length ? ' (' + pending.length + ')' : ''}`], ['year', 'السنة'], ['cyc', 'الدورات والإقفال'], ['div', 'التقسيمات'], ['users', 'المستخدمون'], ['emp', 'سجل الموظفين']].map(([k, l]) => <button key={k} className={`btn s ${tab === k ? '' : 'o'}`} onClick={() => setTab(k)}>{l}</button>)}</div>
     {tab === 'req' && <>
       {!pending.length && <div className="card empty"><Icon n="check" size={26} />لا توجد طلبات انضمام معلّقة.</div>}
       <div className="grid g2 stg">{pending.map((r, i) => { const d = dec[r.id] || {}; const role = d.role || r.requested_role
@@ -67,6 +68,7 @@ export default function Settings() {
       <div className="f"><label>أقصى مبلغ مبادر للموظف (ر.ع)</label><input type="number" defaultValue={ys.initiator_max} onBlur={(e) => run(sb.from('year_settings').update({ initiator_max: +e.target.value }).eq('year', year))} /></div>
       <div className="f"><label>نصيب الموظف (ر.ع)</label><input type="number" defaultValue={ys.rate_per_employee} onBlur={(e) => run(sb.from('year_settings').update({ rate_per_employee: +e.target.value }).eq('year', year))} /></div>
       <div className="f"><button className="btn o" onClick={async () => { const y = +prompt('السنة الجديدة (مثال 2028)'); if (y) { await rpc('init_year', { p_year: y }); reload() } }}>إضافة سنة جديدة</button></div></div>}
+    {tab === 'cyc' && <Cycles />}
     {tab === 'div' && <><div className="card tw"><table><thead><tr><th>التقسيم</th><th>الأعلى</th><th>المحافظة</th><th>خدمة</th><th>محسوب ضمن الأعلى</th><th>العدد {year}</th><th>مستفيدو خدمة المستفيدين / السنة</th></tr></thead><tbody>
       {divisions.map((d) => <tr key={d.id}><td>{d.name}</td><td>{divisions.find((x) => x.id === d.parent_id)?.name || '—'}</td><td>{d.governorate}</td>
         <td><input type="checkbox" checked={d.is_service} onChange={(e) => run(sb.from('divisions').update({ is_service: e.target.checked }).eq('id', d.id))} /></td>

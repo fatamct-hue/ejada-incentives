@@ -1,6 +1,6 @@
 import Icon from './Icon'
 import { CountUp } from './motion'
-import { ROLE_META } from './lib'
+import { ROLE_META, ST } from './lib'
 
 // بانر الدور: يوضح من أنت وما مسؤولياتك
 export function RoleHero({ role, name, children, stat }) {
@@ -25,4 +25,19 @@ export function Funnel({ stages, onPick }) {
 export function Task({ n, label, icon, onClick, tone }) {
   return <button className={`task ${n ? 'hot' : ''} ${tone || ''}`} onClick={onClick}><span className="tn num">{n ? <CountUp value={n} /> : <Icon n="check" size={20} />}</span>
     <Icon n={icon} size={18} /><span className="tl">{label}</span><Icon n="arrow" size={16} className="tgo" /></button>
+}
+
+// أعمدة متحركة (مقارنة الأرباع)
+export function Bars({ labels, series }) {
+  const max = Math.max(1, ...series.flatMap((s) => s.v))
+  return <><div className="bars">{labels.map((l, i) => <div className="bgrp" key={l}><div className="bcols">
+    {series.map((s, j) => <div className="bcol" key={j} style={{ height: `${Math.max(3, (s.v[i] / max) * 100)}%`, background: s.c, '--i': i * series.length + j }}><b className="num">{s.v[i]}</b></div>)}</div></div>)}</div>
+    <div className="blabs">{labels.map((l) => <span key={l}>{l}</span>)}</div></>
+}
+export const DCOL = { review: '#0f446c', approved: '#43b987', to_pay: '#aa7f67', honored: '#00253e', needs_info: '#d9a441' }
+export function Donut({ parts, total }) {
+  const R = 54, C = 2 * Math.PI * R; let off = 0
+  return <svg className="donut" viewBox="0 0 150 150" role="img"><circle cx="75" cy="75" r={R} stroke="#eceae4" />
+    {parts.filter((p) => p.v).map((p, i) => { const len = (p.v / (total || 1)) * C; const el = <circle key={p.k} cx="75" cy="75" r={R} stroke={p.c} strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-off} style={{ animationDelay: `${i * 120}ms` }} />; off += len; return el })}
+    <text x="75" y="82" textAnchor="middle" fontSize="26" fill="#00253e">{total}</text></svg>
 }

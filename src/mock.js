@@ -31,7 +31,7 @@ const db = {
     mkNom({ track: 'service', period: 1, division_id: 'd0', emp_no: '1001', status: 'honored', total: 92, scores: score(9), honored_on: '2026-04-30', paid_on: '2026-04-20', amount: 300 }),
     mkNom({ track: 'service', period: 1, division_id: 'd1', emp_no: '1002', status: 'approved', total: 88, scores: score(9), amount: 300 }),
     mkNom({ track: 'service', period: 1, division_id: 'd2', emp_no: '1003', status: 'review', total: 85, scores: score(8), amount: 300 }),
-    mkNom({ track: 'service', period: 2, division_id: 'd0', emp_no: '1005', status: 'sent', total: 90, scores: score(9) }),
+    mkNom({ track: 'service', period: 2, division_id: 'd0', emp_no: '1005', status: 'review', total: 90, scores: score(9) }),
     mkNom({ track: 'service', period: 2, division_id: 'd0', emp_no: '1009', status: 'needs_info', total: 70, scores: score(7), needs_info_reason: 'يرجى إرفاق شاهد إضافي' }),
     mkNom({ track: 'initiator', period: 1, division_id: 'd0', emp_no: '1005', status: 'approved', initiative_title: 'أتمتة طلبات الفحص', amount: 400, total: 86 }),
     mkNom({ track: 'initiator', period: 1, division_id: 'd1', emp_no: '1002', status: 'review', initiative_title: 'دليل الإجراءات المبسط', amount: 250, total: 80 }),
@@ -59,7 +59,7 @@ const rpcs = {
     if (p.id) { Object.assign(db.nominations.find((n) => n.id === p.id), { ...p, emp_name: e.name, total }); return p.id }
     const n = mkNom({ ...p, division_id: me().division_id, total, emp_no: e.emp_no }); db.nominations.unshift(n); log(n, 'save_draft'); return n.id },
   transition_nomination: ({ p_id, p_action, p_note, p_date }) => { const n = db.nominations.find((x) => x.id === p_id); const from = n.status
-    const to = { submit: 'sent', receive: 'review', needs_info: 'needs_info', approve: 'approved', to_pay: 'to_pay', honor: 'honored' }[p_action]
+    const to = { submit: 'review', needs_info: 'needs_info', approve: 'approved', to_pay: 'to_pay', honor: 'honored' }[p_action]
     if (p_action === 'needs_info') n.needs_info_reason = p_note; if (p_action === 'pay') n.paid_on = p_date || '2026-11-15'; if (p_action === 'honor') n.honored_on = p_date || '2026-11-15'
     n.status = to; log(n, p_action, from); return n },
   save_innovator_result: ({ p }) => { const e = db.employees.find((x) => x.emp_no === p.emp_no); db.nominations.unshift(mkNom({ track: 'innovator', year: p.year, period: p.period, rank: p.rank, emp_no: e.emp_no, division_id: p.division_id || e.division_id, status: 'review',
@@ -77,7 +77,7 @@ const rpcs = {
   request_access: () => 'ok', approve_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'approved'; }, reject_access_request: ({ p_id }) => { const r = db.access_requests.find((x) => x.id === p_id); if (r) r.status = 'rejected'; },
   find_conflicts: () => [], resolve_conflict: () => 0, init_year: () => null, close_year: () => null,
   cycle_status: ({ p_year }) => db.cycles.filter((c) => c.year === p_year).map((c) => { const ns = db.nominations.filter((n) => n.track === c.track && n.period === c.period && n.year === p_year); const ap = ns.filter((n) => ['approved', 'to_pay', 'paid', 'honored'].includes(n.status)).length
-    const ex = c.track === 'service' ? 6 : c.track === 'innovator' ? 3 : 0; const pn = ns.filter((n) => ['sent', 'review'].includes(n.status)).length
+    const ex = c.track === 'service' ? 6 : c.track === 'innovator' ? 3 : 0; const pn = ns.filter((n) => n.status === 'review').length
     return { cycle_id: c.id, track: c.track, period: c.period, is_open: c.is_open, closes_on: c.closes_on, state: c.closes_on && c.closes_on > '2026-11-15' ? 'not_ended' : ap === ex && ex ? 'complete' : pn ? 'awaiting' : 'incomplete', approved_count: ap, expected: ex, pending: pn } }),
   approve_publish: ({ p_year }) => { db.publish_versions.unshift({ id: uid(), year: p_year, approved_by: me().full_name, approved_at: new Date().toISOString(), rows: db.nominations.filter((n) => n.status === 'honored').map((n) => ({ name: n.emp_name, division: db.divisions.find((d) => d.id === n.division_id).name, track: n.track, period: n.period, rank: n.rank })) }); return 'ok' },
 }

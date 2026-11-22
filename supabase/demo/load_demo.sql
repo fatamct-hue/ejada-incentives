@@ -8,10 +8,10 @@ declare
   families text[] := array['الحارثي','البلوشي','الرواحي','السعدي','الكندي','المعمري','الهنائي','الشكيلي','العامري','البوسعيدي','المقبالي','الريامي','الفارسي','الجابري'];
   titles text[] := array['أخصائي خدمات','مشرف قسم','أخصائي أول','فني','أخصائي','مساعد إداري'];
   ini_titles text[] := array['أتمتة طلبات الفحص','دليل الإجراءات المبسط','لوحة متابعة الأداء','تبسيط نموذج الطلبات','تحسين زمن الاستجابة','الأرشفة الرقمية للمعاملات','برنامج تدريب الزملاء الجدد','قاعدة المعرفة الداخلية','تحسين مسار الشكاوى','تقرير الإنجاز الأسبوعي','مبادرة الاجتماعات الفعّالة','تحديث دليل الخدمات','فرز المعاملات الذكي','تبادل الخبرات بين الأقسام','قياس رضا المراجعين','تقليل استهلاك الورق','حل مشكلة تكرار الطلبات','تنظيم الأرشيف الفني','تسريع إصدار الشهادات','بوابة متابعة الطلبات','نموذج التقييم السريع'];
-  st_s1 text[] := array['honored','honored','honored','honored','honored','honored','honored','paid','paid','to_pay','approved','approved','review','review'];
-  st_s2 text[] := array['sent','sent','sent','sent','review','review','review','review','needs_info','draft','draft','approved','review','sent'];
-  st_i1 text[] := array['honored','paid','paid','to_pay','approved','approved','approved','review','review'];
-  st_i2 text[] := array['review','review','sent','sent','draft','needs_info'];
+  st_s1 text[] := array['honored','honored','honored','honored','honored','honored','honored','to_pay','to_pay','to_pay','approved','approved','review','review'];
+  st_s2 text[] := array['review','review','review','review','review','review','review','review','needs_info','draft','draft','approved','review','review'];
+  st_i1 text[] := array['honored','to_pay','to_pay','to_pay','approved','approved','approved','review','review'];
+  st_i2 text[] := array['review','review','review','review','draft','needs_info'];
 begin
   -- 0) تنظيف التجريبي السابق
   delete from nominations where is_demo or emp_no in (select emp_no from employees where is_demo);
@@ -55,7 +55,7 @@ begin
     from _bd b where b.ir between 10 and 15;
   -- حالة تعارض مسارات: الموظف نفسه مرشّح في خدمة المستفيدين والمبادر في الربع الثاني
   insert into _plan (track, period, division_id, k, status, amount, title)
-    select 'initiator'::track_kind, 2, p.division_id, 2, 'sent'::nom_status, 300, 'مبادرة موازية لنفس الموظف' from _plan p where p.track = 'service' and p.period = 2 and p.status in ('sent','review') order by p.division_id limit 1;
+    select 'initiator'::track_kind, 2, p.division_id, 2, 'review'::nom_status, 300, 'مبادرة موازية لنفس الموظف' from _plan p where p.track = 'service' and p.period = 2 and p.status in ('review') order by p.division_id limit 1;
   -- المبتكر (النصف الأول): فردي، وفريق، وفردي
   insert into _plan (track, period, division_id, k, status, rk, title, idea, ideano, team)
     select 'innovator'::track_kind, 1, d.id, 5, v.st::nom_status, v.rk, null, v.idea, v.no, v.team

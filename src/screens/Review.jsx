@@ -4,7 +4,7 @@ import Icon from '../Icon'
 import NomModal from './NomModal'
 
 const TABS = {
-  ejada: [['new', 'بانتظار الاستلام', (n) => n.status === 'sent'], ['rev', 'بانتظار اعتماد الجهة', (n) => n.status === 'review'], ['ret', 'معادة', (n) => n.status === 'needs_info'], ['hon', 'محالة للصرف بانتظار التكريم', (n) => n.status === 'to_pay'], ['all', 'الكل', (n) => n.status !== 'draft']],
+  ejada: [['rev', 'بانتظار اعتماد الجهة', (n) => n.status === 'review'], ['ret', 'معادة', (n) => n.status === 'needs_info'], ['hon', 'محالة للصرف بانتظار التكريم', (n) => n.status === 'to_pay'], ['okk', 'معتمدة', (n) => n.status === 'approved'], ['done', 'مكرَّمة', (n) => n.status === 'honored'], ['all', 'الكل', (n) => n.status !== 'draft']],
   dev: [['wait', 'بانتظار الاعتماد', (n) => n.status === 'review'], ['done', 'المعتمدة', (n) => ['approved', 'to_pay', 'honored'].includes(n.status)]],
   admin_fin: [['wait', 'بانتظار الاعتماد', (n) => n.status === 'review' && n.track === 'initiator'], ['appr', 'معتمدة للإحالة', (n) => n.status === 'approved'],
     ['pay', 'محالة للصرف', (n) => n.status === 'to_pay'], ['done', 'مكرَّمة', (n) => n.status === 'honored']],

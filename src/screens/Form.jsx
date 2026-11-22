@@ -32,6 +32,7 @@ function Gauge({ total, max = 100 }) {
 }
 export default function Form({ track, go }) {
   const { me, year, ys, criteria, cycles, outlets, divisions, noms, rpc, reload, say } = useApp()
+  const isInit = track === 'initiator'
   const T = TRACKS[track]; const div = divisions.find((d) => d.id === me.division_id)
   const crit = useMemo(() => criteria.filter((c) => c.track === track && c.active), [criteria, track])
   const groups = useMemo(() => { const g = {}; crit.forEach((c) => (g[c.group_title] ||= []).push(c)); return g }, [crit])
@@ -73,7 +74,7 @@ export default function Form({ track, go }) {
   const divOutlets = outlets.filter((o) => o.division_id === me.division_id)
   const done = {
     scores: crit.every((c) => f.scores[c.id] !== undefined && f.scores[c.id] !== ''),
-    just: !!(f.justification || '').trim(), ev: files.length > 0, mgr: !!(f.direct_manager || '').trim(), emp: !!emp,
+    just: !!(f.justification || '').trim(), ev: !isInit || files.length > 0, mgr: !!(f.direct_manager || '').trim(), emp: !!emp,
     ...(track === 'initiator' ? { amt: Number(f.amount) >= (ys?.initiator_min ?? 50) && Number(f.amount) <= (ys?.initiator_max ?? 300), title: !!(f.initiative_title || '').trim() } : {}) }
   const checks = [['emp', 'الموظف'], ['scores', `الدرجات (${crit.filter((c) => f.scores[c.id] !== undefined).length}/${crit.length})`], ...(track === 'initiator' ? [['title', 'عنوان المبادرة'], ['amt', 'المبلغ المقترح']] : []), ['just', 'مسوغات الترشيح'], ['ev', 'الشاهد'], ['mgr', 'المسؤول المباشر']]
   const pct = Math.round((checks.filter(([k]) => done[k]).length / checks.length) * 100)
@@ -118,9 +119,9 @@ export default function Form({ track, go }) {
     <div className="sect"><span className="nn">3</span>مسوغات الترشيح <span className="req" style={{ color: 'var(--danger)' }}>*</span></div>
     <div className="card"><textarea style={{ width: '100%', minHeight: 110, border: '1px solid var(--grey-a)', borderRadius: 12, padding: 12, background: 'rgba(255,255,255,.8)' }} value={f.justification || ''} onChange={(e) => set('justification', e.target.value)} placeholder={track === 'initiator' ? 'صف المبادرة، وما تجاوز فيه واجباته، ودوره الشخصي، والأثر' : 'اذكر أبرز الإنجازات والمبادرات التي تجعله نموذجاً للتميز'} /></div>
 
-    <div className="sect"><span className="nn">4</span>الشواهد <span className="req" style={{ color: 'var(--danger)' }}>*</span></div>
+    <div className="sect"><span className="nn">4</span>الشواهد {isInit ? <span className="req" style={{ color: 'var(--danger)' }}>*</span> : <span className="muted small">(اختيارية)</span>}</div>
     <div className="card"><label className="btn o" style={{ cursor: 'pointer' }}><Icon n="upload" size={18} />رفع شاهد<input type="file" onChange={upload} style={{ display: 'none' }} /></label>
-      <div className="flt" style={{ marginTop: 10 }}>{files.map((a) => <span key={a.id} className="pill st-sent"><Icon n="report" size={14} />{a.file_name} <a href="#" onClick={(e) => { e.preventDefault(); delFile(a) }}>✕</a></span>)}{!files.length && <span className="muted small">لم يُرفع شاهد بعد. شاهد واحد على الأقل مطلوب.</span>}</div></div>
+      <div className="flt" style={{ marginTop: 10 }}>{files.map((a) => <span key={a.id} className="pill st-sent"><Icon n="report" size={14} />{a.file_name} <a href="#" onClick={(e) => { e.preventDefault(); delFile(a) }}>✕</a></span>)}{!files.length && <span className="muted small">{isInit ? 'لم يُرفع شاهد بعد. شاهد واحد على الأقل مطلوب.' : 'لا شواهد مرفقة (اختياري).'}</span>}</div></div>
 
     <div className="sect"><span className="nn">5</span>الاعتمادات</div>
     <div className="card form">

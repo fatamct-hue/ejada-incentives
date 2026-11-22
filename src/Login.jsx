@@ -42,9 +42,14 @@ function RequestForm({ back, presetEmail, onClose }) {
     <button type="button" className="btn o" onClick={back}>رجوع</button></Frame>
 }
 
+const KEY = 'ejada_emails'
+const getEmails = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]').slice(0, 5) } catch { return [] } }
+const remember = (e) => { try { localStorage.setItem(KEY, JSON.stringify([e, ...getEmails().filter((x) => x !== e)].slice(0, 5))) } catch { /* لا تخزين */ } }
+const forget = (e) => { try { localStorage.setItem(KEY, JSON.stringify(getEmails().filter((x) => x !== e))) } catch { /* لا تخزين */ } }
+
 export default function Login({ start = 'login', onClose }) {
   const [mode, setMode] = useState(start)
-  const [email, setEmail] = useState(''); const [step, setStep] = useState(0); const [code, setCode] = useState(''); const [err, setErr] = useState('')
+  const [saved, setSaved] = useState(getEmails); const [email, setEmail] = useState(() => getEmails()[0] || ''); const [step, setStep] = useState(0); const [code, setCode] = useState(''); const [err, setErr] = useState('')
   if (mode === 'request') return <RequestForm back={() => setMode('login')} presetEmail={email} onClose={onClose} />
   const send = async (e) => {
     e.preventDefault(); setErr('')
@@ -54,11 +59,12 @@ export default function Login({ start = 'login', onClose }) {
   const verify = async (e) => {
     e.preventDefault(); setErr('')
     const { error } = await sb.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'email' })
-    if (error) setErr('الرمز غير صحيح أو منتهي.')
+    if (error) setErr('الرمز غير صحيح أو منتهي.'); else remember(email.trim())
   }
   return <Frame onClose={onClose} onSubmit={step ? verify : send}>
     <div className="muted small" style={{ textAlign: 'center' }}>يديرها فريق الإجادة المؤسسية</div>
-    <div className="f"><label>البريد الإلكتروني الحكومي</label><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} disabled={!!step} dir="ltr" /></div>
+    <div className="f"><label>البريد الإلكتروني الحكومي</label><input type="email" name="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} disabled={!!step} dir="ltr" /></div>
+    {!step && saved.length > 0 && <div className="flt" style={{ gap: 6 }}><span className="muted small">دخلت بها سابقاً:</span>{saved.map((m) => <span key={m} className="pill st-approved" style={{ cursor: 'pointer' }} onClick={() => setEmail(m)} dir="ltr">{m} <a href="#" title="إزالة" onClick={(e) => { e.preventDefault(); e.stopPropagation(); forget(m); setSaved(getEmails()) }}>✕</a></span>)}</div>}
     {step === 1 && <div className="f"><label>رمز الدخول المرسل إلى بريدك</label><input required value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" dir="ltr" autoFocus /></div>}
     {err && <div className="alert r">{err}</div>}
     <button className="btn t"><Icon n={step ? 'shield' : 'mail'} size={18} />{step ? 'دخول' : 'إرسال رمز الدخول'}</button>
