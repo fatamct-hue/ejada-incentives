@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { sb } from '../supabase'
 import { useApp, Sec, TRACKS, periodName, fmt } from '../lib'
+import { PriorAlert } from './NomModal'
 import Icon, { TRACK_ICON } from '../Icon'
 import { CountUp } from '../motion'
 
@@ -36,7 +37,7 @@ export default function Form({ track, go }) {
   const groups = useMemo(() => { const g = {}; crit.forEach((c) => (g[c.group_title] ||= []).push(c)); return g }, [crit])
   const open = cycles.filter((c) => c.year === year && c.track === track && c.is_open)
   const blank = { id: null, period: open[0]?.period || '', emp_no: '', department: '', direct_manager: '', outlet_id: '', scores: {}, evidence_notes: {}, justification: '', initiative_title: '', initiative_date: '', beneficiaries: '', amount: '' }
-  const [f, setF] = useState(blank); const [emp, setEmp] = useState(null); const [files, setFiles] = useState([]); const [bud, setBud] = useState(null); const [busy, setBusy] = useState(false); const [evOpen, setEvOpen] = useState({})
+  const [f, setF] = useState(blank); const [emp, setEmp] = useState(null); const [files, setFiles] = useState([]); const [bud, setBud] = useState(null); const [busy, setBusy] = useState(false); const [evOpen, setEvOpen] = useState({}); const [prior, setPrior] = useState([])
   const set = (k, v) => setF((x) => ({ ...x, [k]: v }))
   useEffect(() => {
     const id = sessionStorage.getItem('edit')
@@ -45,7 +46,8 @@ export default function Form({ track, go }) {
     if (track === 'initiator') rpc('budget_table', { p_year: year }).then((r) => setBud(r?.[0] || null)).catch(() => {})
   }, [])
   useEffect(() => {
-    const t = setTimeout(async () => { if (!f.emp_no.trim()) return setEmp(null); const r = await sb.rpc('lookup_employee', { p_emp_no: f.emp_no }); setEmp(r.data?.[0] || false) }, 350)
+    const t = setTimeout(async () => { if (!f.emp_no.trim()) { setPrior([]); return setEmp(null) } const r = await sb.rpc('lookup_employee', { p_emp_no: f.emp_no }); const e = r.data?.[0] || false; setEmp(e)
+      if (e) { const pr = await sb.rpc('employee_honors', { p_emp_no: f.emp_no, p_exclude: f.id || null }); setPrior(pr.data || []) } else setPrior([]) }, 350)
     return () => clearTimeout(t)
   }, [f.emp_no])
   const loadFiles = async (id) => { const r = await sb.from('attachments').select('*').eq('nomination_id', id); setFiles(r.data || []) }
@@ -72,7 +74,7 @@ export default function Form({ track, go }) {
   const done = {
     scores: crit.every((c) => f.scores[c.id] !== undefined && f.scores[c.id] !== ''),
     just: !!(f.justification || '').trim(), ev: files.length > 0, mgr: !!(f.direct_manager || '').trim(), emp: !!emp,
-    ...(track === 'initiator' ? { amt: Number(f.amount) > 0, title: !!(f.initiative_title || '').trim() } : {}) }
+    ...(track === 'initiator' ? { amt: Number(f.amount) >= (ys?.initiator_min ?? 50) && Number(f.amount) <= (ys?.initiator_max ?? 300), title: !!(f.initiative_title || '').trim() } : {}) }
   const checks = [['emp', 'الموظف'], ['scores', `الدرجات (${crit.filter((c) => f.scores[c.id] !== undefined).length}/${crit.length})`], ...(track === 'initiator' ? [['title', 'عنوان المبادرة'], ['amt', 'المبلغ المقترح']] : []), ['just', 'مسوغات الترشيح'], ['ev', 'الشاهد'], ['mgr', 'المسؤول المباشر']]
   const pct = Math.round((checks.filter(([k]) => done[k]).length / checks.length) * 100)
   const ready = pct === 100
@@ -81,7 +83,9 @@ export default function Form({ track, go }) {
     <div className="card" style={{ '--c': T.c }}>
       <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}><div className="ic-box" style={{ width: 52, height: 52, borderRadius: 15, display: 'grid', placeItems: 'center', background: T.cb, color: T.c }}><Icon n={TRACK_ICON[track]} size={28} /></div>
         <div><h2 style={{ fontSize: 20 }}>{`استمارة ترشيح ${T.name}`}</h2><div className="muted small">{div?.name}</div></div></div>
-      {bud && <div className="alert i" style={{ margin: '12px 0 0' }}><Icon n="coin" size={18} />الرصيد المتاح لمخصص المبادر: <b className="num">{fmt(bud.balance)}</b> ر.ع</div>}
+      {bud && <div className="budbanner"><div><div className="bl">المتاح لتقسيمك في مسار المبادر</div><div className="bv num">{fmt(bud.balance)}<small> ر.ع</small></div></div>
+        <div className="bbar"><div className="prog"><i style={{ width: `${Math.min(100, ((bud.allocation - bud.balance) / (bud.allocation || 1)) * 100)}%` }} /></div><div className="small">المستهلك {fmt(bud.allocation - bud.balance)} من {fmt(bud.allocation)} ر.ع</div></div>
+        <div className="blim"><Icon n="shield" size={16} />المبلغ للموظف الواحد: من <b className="num">{fmt(ys?.initiator_min ?? 50)}</b> إلى <b className="num">{fmt(ys?.initiator_max ?? 300)}</b> ر.ع</div></div>}
       <div className="sect" style={{ marginTop: 16 }}><span className="nn">1</span>البيانات الأساسية</div>
       <div className="form" style={{ marginTop: 10 }}>
         <div className="f"><label>الربع <span className="req">*</span></label><select value={f.period} onChange={(e) => set('period', +e.target.value)} disabled={!!f.id}>{open.map((c) => <option key={c.id} value={c.period}>{periodName(track, c.period)}</option>)}</select></div>
@@ -89,6 +93,7 @@ export default function Form({ track, go }) {
         <div className="f"><label>الرقم الوظيفي <span className="req">*</span></label><input value={f.emp_no} onChange={(e) => set('emp_no', e.target.value)} dir="ltr" placeholder="اكتب الرقم الوظيفي" />
           {emp === false && <span className="hint" style={{ color: 'var(--danger)' }}>الرقم غير مسجل ضمن تقسيمك</span>}</div>
         <div className="f"><label>الموظف</label><input readOnly value={emp ? `${emp.name} — ${emp.title || ''}` : ''} /></div>
+        {prior.length > 0 && <div className="f w"><PriorAlert rows={prior} year={year} track={track} /></div>}
         <div className="f"><label>الدائرة / القسم</label><input value={f.department || ''} onChange={(e) => set('department', e.target.value)} /></div>
         {track === 'service' && <div className="f"><label>المنفذ</label><select value={f.outlet_id} onChange={(e) => set('outlet_id', e.target.value)}><option value="">—</option>{divOutlets.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</select></div>}
         {track === 'initiator' && <>
@@ -119,7 +124,8 @@ export default function Form({ track, go }) {
 
     <div className="sect"><span className="nn">5</span>الاعتمادات</div>
     <div className="card form">
-      {track === 'initiator' && <div className="f"><label>المبلغ المقترح (ر.ع) <span className="req">*</span></label><input type="number" min="0" step="0.001" value={f.amount} onChange={(e) => set('amount', e.target.value)} /></div>}
+      {track === 'initiator' && <div className="f"><label>المبلغ المقترح (ر.ع) <span className="req">*</span></label><input type="number" min={ys?.initiator_min ?? 50} max={ys?.initiator_max ?? 300} step="1" value={f.amount} onChange={(e) => set('amount', e.target.value)} />
+        <span className="hint" style={{ color: f.amount !== '' && (Number(f.amount) < (ys?.initiator_min ?? 50) || Number(f.amount) > (ys?.initiator_max ?? 300)) ? 'var(--danger)' : undefined }}>بين {fmt(ys?.initiator_min ?? 50)} و{fmt(ys?.initiator_max ?? 300)} ر.ع للموظف الواحد</span></div>}
       <div className="f"><label>المسؤول المباشر <span className="req">*</span></label><input value={f.direct_manager || ''} onChange={(e) => set('direct_manager', e.target.value)} /></div>
       <div className="f"><label>اعتماد المدير العام</label><input readOnly value={me.full_name} /></div></div>
    </div>

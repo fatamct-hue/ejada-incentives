@@ -9,7 +9,7 @@ function Reveal({ children, className = '', delay = 0 }) {
   return <div ref={ref} className={`rv ${on ? 'in' : ''} ${className}`} style={{ '--d': `${delay}ms` }}>{children}</div>
 }
 
-const FLOW = [['إعداد الترشيح وإرساله', 'send', 'يعبّئ المدير العام الاستمارة ويعتمدها ويرسلها.'], ['الاستلام والمراجعة', 'review', 'يستلم فريق الإجادة الترشيح ويراجعه.'], ['الاعتماد', 'check', 'تعتمده الجهة المختصة بالمسار.'], ['الصرف', 'coin', 'تحيل الشؤون الإدارية والمالية الحافز وتسجّل صرفه.'], ['التكريم', 'trophy', 'يُسجَّل التكريم ويُدرج في قوائم التكريم.']]
+const FLOW = [['إعداد الترشيح وإرساله', 'send', 'يعبّئ المدير العام الاستمارة ويعتمدها ويرسلها.'], ['الاستلام والمراجعة', 'review', 'يستلم فريق الإجادة الترشيح ويراجعه.'], ['الاعتماد', 'check', 'تعتمده الجهة المختصة بالمسار.'], ['الإحالة للصرف', 'coin', 'تستخرج الشؤون الإدارية والمالية كشف الحوافز وتصنّفه محالاً للصرف.'], ['التكريم', 'trophy', 'يُسجَّل التكريم ويُدرج في قوائم التكريم.']]
 const ROLES_INFO = [
   ['dg', 'unit', 'المدير العام / المسؤول الأعلى', 'يعبّئ استمارات الترشيح لتقسيمه، ويعتمد ويرسل، ويستكمل ما يُعاد إليه، ويتابع جوائز تقسيمه ومخصصاته.', '#006452'],
   ['ejada', 'shield', 'فريق الإجادة المؤسسية', 'يجمع الترشيحات من جميع الجهات ويحصرها، ويقدّم النظرة العامة على المنصة، ويستلم الترشيحات ويراجعها، ويدخل نتائج المبتكر، ويسجّل التكريم، ويُصدر القوائم والتقارير.', '#00827a'],
@@ -48,6 +48,11 @@ export default function Landing() {
 
     <section id="roles" className="lsec"><Reveal><h2 className="lt">من يفعل ماذا</h2><p className="ls">لكل جهة دور محدد في المنصة وصلاحيات تُطبَّق على الخادم.</p></Reveal>
       <div className="grid g4 stg">{ROLES_INFO.map(([k, ic, t, d, c], i) => <Reveal key={k} delay={i * 90}><div className="card lift rc" style={{ '--c': c }}><div className="ri"><Icon n={ic} size={24} /></div><h3>{t}</h3><p>{d}</p></div></Reveal>)}</div></section>
+
+    <section className="lmot"><i className="orb" /><div className="lmot-in"><Reveal><div className="rtag"><Icon n="spark" size={16} />رسالتنا</div>
+      <h2>الوزارة قائمة بدورها في تقدير من يصنع الفرق</h2><p>نؤمن أن التميّز يبدأ بالمبادرة، وأن الموظف المتقن لعمله هو أساس جودة الخدمة. ومن هنا جاءت هذه المنصة: لنُنصف المجتهدين، ونكرّم المتميزين، ونحفّز الجميع على الأفضل.</p></Reveal>
+      <div className="grid g3 stg" style={{ marginTop: 22 }}>{[['trophy', 'التميّز يُكرَّم', 'كل جهد متقن يستحق التقدير، وكل إنجاز موثّق يجد طريقه إلى التكريم.'], ['spark', 'المبادرة تصنع الأثر', 'من يبادر خارج مهامه المعتادة يضع بصمته في تحسين العمل وخدمة المستفيدين.'], ['bulb', 'الابتكار طريقنا للأفضل', 'الفكرة الجيدة اليوم هي خدمة أسرع وتكلفة أقل غداً، ونحن نحتفي بأصحابها.']].map(([ic, t, d], i) =>
+        <Reveal key={t} delay={i * 110}><div className="mcard"><div className="mi"><Icon n={ic} size={26} /></div><h3>{t}</h3><p>{d}</p></div></Reveal>)}</div></div></section>
 
     <section className="lsec"><Reveal><div className="lcta"><i className="orb" /><div><h2>هل أنت من منسوبي الوزارة؟</h2><p>قدّم طلب انضمام بصفتك، وبعد اعتماده من فريق الإجادة تدخل المنصة برمز يصل إلى بريدك الحكومي.</p></div>
       <div className="lh-cta"><button className="btn c" onClick={() => open('request')}>قدّم طلب انضمام</button><button className="btn o" onClick={() => open('login')}>لدي حساب</button></div></div></Reveal></section>

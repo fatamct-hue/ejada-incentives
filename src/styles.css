@@ -502,3 +502,19 @@ details.viewas[open] summary{margin-bottom:8px}
 html{scroll-behavior:smooth}
 ::selection{background:rgba(74,214,237,.4)}
 .prevbox{margin-top:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,.7);border:1px dashed var(--teal)}
+
+/* لافتة المتاح من مخصص المبادر */
+.budbanner{display:grid;grid-template-columns:auto 1fr;gap:10px 24px;align-items:center;margin-top:14px;padding:18px 22px;border-radius:18px;color:#fff;background:radial-gradient(120% 140% at 100% 0%,#00827a,#00253e 75%);position:relative;overflow:hidden}
+.budbanner::before{content:"";position:absolute;inset:0;background-image:var(--pat);background-size:80px 80px;opacity:.7}
+.budbanner>*{position:relative}.budbanner .bl{font-size:13px;color:#cfe6ee}.budbanner .bv{font-size:46px;font-weight:900;line-height:1.1;color:var(--cyan)}.budbanner .bv small{font-size:18px;color:#fff}
+.budbanner .prog{background:rgba(255,255,255,.2)}.budbanner .prog i{background:linear-gradient(90deg,var(--cyan),#43b987)}.budbanner .bbar .small{margin-top:4px;color:#d6e6ee}
+.blim{grid-column:1/-1;display:inline-flex;gap:8px;align-items:center;font-size:13.5px;padding:7px 12px;border-radius:12px;background:rgba(255,255,255,.12);width:fit-content}
+@media (max-width:700px){.budbanner{grid-template-columns:1fr}.budbanner .bv{font-size:38px}}
+
+.lmot{position:relative;overflow:hidden;margin-top:70px;padding:64px 24px;color:#fff;background:radial-gradient(110% 130% at 0% 100%,#0f446c,#00253e 65%)}
+.lmot::before{content:"";position:absolute;inset:0;background-image:var(--pat);background-size:96px 96px;animation:drift 60s linear infinite}
+.lmot .orb{position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(74,214,237,.3),transparent 65%);inset-inline-end:-120px;top:-100px;animation:glow 8s ease-in-out infinite}
+.lmot-in{position:relative;max-width:1080px;margin:auto}.lmot h2{font-size:clamp(26px,3.6vw,40px);line-height:1.4;margin:10px 0}.lmot p{color:#d5e3ed;font-size:17px;max-width:780px;line-height:1.9}
+.mcard{padding:22px;border-radius:20px;background:rgba(255,255,255,.08);border:1px solid rgba(74,214,237,.28);backdrop-filter:blur(8px);height:100%;transition:transform .3s var(--ease),background .3s}
+.mcard:hover{transform:translateY(-6px);background:rgba(255,255,255,.13)}.mcard .mi{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:var(--cyan);background:rgba(74,214,237,.14);margin-bottom:10px}
+.mcard h3{font-size:18px;margin-bottom:6px;color:#fff}.mcard p{font-size:14.5px;line-height:1.8;color:#d5e3ed}

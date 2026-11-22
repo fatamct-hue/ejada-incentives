@@ -8,12 +8,12 @@ export default function CommandHome({ go }) {
   const { me, year, noms, divisions, cycles, requests } = useApp()
   const yr = useMemo(() => noms.filter((n) => n.year === year), [noms, year])
   const c = (f) => yr.filter(f).length
-  const sent = c((n) => n.status === 'sent'), review = c((n) => n.status === 'review'), paid = c((n) => n.status === 'paid')
+  const sent = c((n) => n.status === 'sent'), review = c((n) => n.status === 'review'), paid = c((n) => n.status === 'to_pay')
   const back = c((n) => n.status === 'needs_info'); const pendReq = requests.filter((r) => r.status === 'pending').length
   const notStarted = divisions.filter((d) => d.active && d.is_service && !yr.some((n) => n.division_id === d.id && n.status !== 'draft')).length
-  const tasks = [[sent, 'ترشيحات مرسلة بانتظار الاستلام', 'send', 'review'], [review, 'بانتظار اعتماد الجهة المختصة', 'review', 'review'], [paid, 'مصروفة بانتظار تسجيل التكريم', 'trophy', 'review'], [pendReq, 'طلبات انضمام مستخدمين بانتظار الاعتماد', 'users', 'settings']]
+  const tasks = [[sent, 'ترشيحات مرسلة بانتظار الاستلام', 'send', 'review'], [review, 'بانتظار اعتماد الجهة المختصة', 'review', 'review'], [paid, 'محالة للصرف بانتظار تسجيل التكريم', 'trophy', 'review'], [pendReq, 'طلبات انضمام مستخدمين بانتظار الاعتماد', 'users', 'settings']]
   const total = tasks.reduce((s, t) => s + t[0], 0)
-  const stages = [['sent', 'مرسل', '#6f92b4'], ['review', 'قيد المراجعة', '#0f446c'], ['approved', 'معتمد', '#43b987'], ['to_pay', 'أُحيل للصرف', '#aa7f67'], ['paid', 'صُرف', '#c79a7f'], ['honored', 'تم التكريم', '#00253e']].map(([k, l, col]) => ({ k, l, c: col, n: c((n) => n.status === k) }))
+  const stages = [['sent', 'مرسل', '#6f92b4'], ['review', 'قيد المراجعة', '#0f446c'], ['approved', 'معتمد', '#43b987'], ['to_pay', 'أُحيل للصرف', '#aa7f67'], ['honored', 'تم التكريم', '#00253e']].map(([k, l, col]) => ({ k, l, c: col, n: c((n) => n.status === k) }))
   const svcDivs = divisions.filter((d) => d.active && d.is_service)
   const openCycles = cycles.filter((x) => x.year === year && x.is_open)
   return <>

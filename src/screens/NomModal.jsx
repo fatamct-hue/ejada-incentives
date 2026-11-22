@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react'
 import { sb } from '../supabase'
 import { useApp, Modal, Pill, TRACKS, periodName, fmt, fdate, approverOf, STN } from '../lib'
+import Icon from '../Icon'
+
+export function PriorAlert({ rows, year, track }) {
+  const cross = rows.some((p) => p.year === year && p.track !== track)
+  return <div className={`alert ${cross ? 'r' : 'w'}`} style={{ margin: '8px 0', flexDirection: 'column', gap: 4 }}><b><Icon n="alert" size={16} /> {cross ? 'لا يجوز اعتماده في مسار آخر في السنة نفسها' : 'تنبيه: سبق اعتماد هذا الموظف أو تكريمه'}</b>
+    {rows.map((p, i) => <span key={i} className="small">{TRACKS[p.track].short} — {p.track === 'innovator' ? `المركز ${p.rank} · ` : ''}{periodName(p.track, p.period)} {p.year} ({STN[p.status]}{p.honored_on ? ` ${fdate(p.honored_on)}` : ''})</span>)}</div>
+}
 
 export default function NomModal({ nom, onClose }) {
   const { me, criteria, divName, rpc, reload, say } = useApp()
-  const [ev, setEv] = useState([]); const [files, setFiles] = useState([]); const [note, setNote] = useState(''); const [date, setDate] = useState('')
+  const [prior, setPrior] = useState([]); const [ev, setEv] = useState([]); const [files, setFiles] = useState([]); const [note, setNote] = useState(''); const [date, setDate] = useState('')
   useEffect(() => {
+    sb.rpc('employee_honors', { p_emp_no: nom.emp_no, p_exclude: nom.id }).then((r) => setPrior(r.data || []))
     sb.from('nomination_events').select('*').eq('nomination_id', nom.id).order('at').then((r) => setEv(r.data || []))
     sb.from('attachments').select('*').eq('nomination_id', nom.id).then((r) => setFiles(r.data || []))
   }, [nom.id])
@@ -20,14 +28,14 @@ export default function NomModal({ nom, onClose }) {
   if (r === 'ejada' && s === 'sent') btns.push(['receive', 'استلام الترشيح', 't'])
   if ((r === 'ejada' || r === ap) && ['sent', 'review'].includes(s)) btns.push(['needs_info', 'إعادة للاستكمال', 'd', true])
   if (r === ap && s === 'review') btns.push(['approve', 'اعتماد', 'g'])
-  if (r === 'admin_fin' && s === 'approved') btns.push(['to_pay', 'إحالة للصرف', 't'])
-  if (r === 'admin_fin' && s === 'to_pay') btns.push(['pay', 'تسجيل الصرف', 'g'])
-  if (r === 'ejada' && s === 'paid') btns.push(['honor', 'تسجيل التكريم', 'g'])
-  const needsDate = ['pay', 'honor'].some((x) => btns.some((b) => b[0] === x))
+  if (r === 'admin_fin' && s === 'approved') btns.push(['to_pay', 'تصنيف: أُحيل للصرف', 't'])
+  if (r === 'ejada' && s === 'to_pay') btns.push(['honor', 'تسجيل التكريم', 'g'])
+  const needsDate = ['honor'].some((x) => btns.some((b) => b[0] === x))
   const group = {}; criteria.filter((c) => c.track === nom.track).forEach((c) => { (group[c.group_title] ||= []).push(c) })
   return <Modal title={`${nom.emp_name} — ${T.short}`} onClose={onClose}
     foot={<>{btns.map(([a, l, c, n]) => <button key={a} className={`btn ${c}`} onClick={() => act(a, n)}>{l}</button>)}<button className="btn o" onClick={onClose}>إغلاق</button></>}>
     <div className="small muted">{divName(nom.division_id)} · {periodName(nom.track, nom.period)} {nom.year} · <Pill s={s} /></div>
+    {prior.length > 0 && <PriorAlert rows={prior} year={nom.year} track={nom.track} />}
     {nom.needs_info_reason && s === 'needs_info' && <div className="alert w" style={{ margin: '8px 0' }}>سبب الإعادة: {nom.needs_info_reason}</div>}
     <dl className="trk" style={{ border: 0 }}><dl>
       <dt>المسمى</dt><dd>{nom.job_title || '—'}</dd>
