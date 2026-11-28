@@ -41,3 +41,9 @@ export function Donut({ parts, total }) {
     {parts.filter((p) => p.v).map((p, i) => { const len = (p.v / (total || 1)) * C; const el = <circle key={p.k} cx="75" cy="75" r={R} stroke={p.c} strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-off} style={{ animationDelay: `${i * 120}ms` }} />; off += len; return el })}
     <text x="75" y="82" textAnchor="middle" fontSize="26" fill="#00253e">{total}</text></svg>
 }
+
+// حلقة تقدّم متحركة
+export function Ring({ value = 0, max = 1, size = 76, color = '#00827a', children }) {
+  const R = 30, C = 2 * Math.PI * R, p = Math.max(0, Math.min(1, max ? value / max : 0))
+  return <span className="ring" style={{ width: size, height: size }}><svg viewBox="0 0 76 76"><circle cx="38" cy="38" r={R} className="rbg" /><circle cx="38" cy="38" r={R} className="rfg" stroke={color} strokeDasharray={`${p * C} ${C}`} /></svg><b className="num">{children}</b></span>
+}

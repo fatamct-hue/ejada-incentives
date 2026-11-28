@@ -518,3 +518,12 @@ html{scroll-behavior:smooth}
 .mcard{padding:22px;border-radius:20px;background:rgba(255,255,255,.08);border:1px solid rgba(74,214,237,.28);backdrop-filter:blur(8px);height:100%;transition:transform .3s var(--ease),background .3s}
 .mcard:hover{transform:translateY(-6px);background:rgba(255,255,255,.13)}.mcard .mi{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:var(--cyan);background:rgba(74,214,237,.14);margin-bottom:10px}
 .mcard h3{font-size:18px;margin-bottom:6px;color:#fff}.mcard p{font-size:14.5px;line-height:1.8;color:#d5e3ed}
+
+.ring{position:relative;display:inline-grid;place-items:center;flex:none}.ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:7}.ring .rbg{stroke:#e4e8ea}.ring .rfg{stroke-linecap:round;animation:ringin 1.2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ringin{from{stroke-dasharray:0 200}}.ring b{font-size:15px;color:var(--navy)}
+.pal{width:min(480px,92vw);margin:12vh auto 0;display:flex;flex-direction:column;gap:2px;padding:10px}
+.pal input{border:0;border-bottom:1px solid #dfe5e8;padding:10px;font:inherit;outline:0;background:transparent;margin-bottom:6px}
+.pal button{display:flex;gap:10px;align-items:center;padding:10px 12px;border:0;background:transparent;border-radius:10px;font:inherit;cursor:pointer;text-align:start;color:var(--navy)}
+.pal button.on{background:var(--teal-b)}
+@media (prefers-reduced-motion:reduce){.ring .rfg{animation:none}}
