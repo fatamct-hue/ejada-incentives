@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useApp, Kpi, Sec, TRACKS, APPROVED, ST, STN, periodName, shortName } from '../lib'
 import Icon, { TRACK_ICON } from '../Icon'
-import { RoleHero, Funnel, Task, Bars, Donut, DCOL } from '../ui'
+import { RoleHero, Funnel, Task, Bars, Donut, DCOL, Ring } from '../ui'
 
 // لوحة فريق الإجادة: مؤشرات وإحصاءات ومتابعة أداء المسارات عن بعد
 export default function CommandHome({ go }) {
@@ -39,7 +39,7 @@ export default function CommandHome({ go }) {
     <div className="grid g3 stg">{Object.entries(TRACKS).map(([k, T], i) => { const t = mine(k); const ap = t.filter((n) => APPROVED.includes(n.status)).length; const exp = k === 'service' ? svcDivs.length * 4 : k === 'innovator' ? 6 : 0
       return <div className="card trk lift" key={k} style={{ '--c': T.c, '--i': i }}><div style={{ display: 'flex', gap: 10, alignItems: 'center' }}><div className="ic-box"><Icon n={TRACK_ICON[k]} size={26} /></div><div><h3 style={{ fontSize: 17 }}>{T.name}</h3><div className="muted small">يعتمده: {T.appr}</div></div></div>
         <div className="tmini"><div><b className="num">{t.length}</b><span>واردة</span></div><div><b className="num">{t.filter((n) => n.status === 'review').length}</b><span>بانتظار الاعتماد</span></div><div><b className="num">{ap}</b><span>معتمدة</span></div><div><b className="num">{t.filter((n) => n.status === 'honored').length}</b><span>مُكرَّمة</span></div></div>
-        {exp > 0 && !fl.q && <><div className="prog"><i style={{ width: `${Math.min(100, (ap / exp) * 100)}%`, background: T.c }} /></div><div className="muted small">{ap} من {exp} {k === 'service' ? 'جائزة (جهة × ربع)' : 'مراكز'}</div></>}</div> })}</div>
+        {exp > 0 && !fl.q && <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}><Ring value={ap} max={exp} color={T.c}>{Math.round((ap / exp) * 100)}%</Ring><div className="muted small">{ap} من {exp} {k === 'service' ? 'جائزة (جهة × ربع)' : 'مراكز'}</div></div>}</div> })}</div>
     <div className="grid g2 stg" style={{ marginTop: 14 }}>
       <div className="card"><h3>مقارنة الأرباع — المعتمدون</h3><Bars labels={['ر1', 'ر2', 'ر3', 'ر4']} series={[{ c: TRACKS.service.c, v: q4.map((p) => all.filter((n) => n.track === 'service' && n.period === p && APPROVED.includes(n.status)).length) }, { c: TRACKS.initiator.c, v: q4.map((p) => all.filter((n) => n.track === 'initiator' && n.period === p && APPROVED.includes(n.status)).length) }]} />
         <div className="legend"><span><i style={{ background: TRACKS.service.c }} />خدمة المستفيدين</span><span><i style={{ background: TRACKS.initiator.c }} />المبادر</span></div></div>

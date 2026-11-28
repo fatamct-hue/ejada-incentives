@@ -83,7 +83,7 @@ export default function Form({ track, go }) {
    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
     <div className="card" style={{ '--c': T.c }}>
       <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}><div className="ic-box" style={{ width: 52, height: 52, borderRadius: 15, display: 'grid', placeItems: 'center', background: T.cb, color: T.c }}><Icon n={TRACK_ICON[track]} size={28} /></div>
-        <div><h2 style={{ fontSize: 20 }}>{`استمارة ترشيح ${T.name}`}</h2><div className="muted small">{div?.name}</div></div></div>
+        <div><h2 style={{ fontSize: 20 }}>{`استمارة ترشيح ${T.name}`}</h2><div className="muted small">{div?.name}</div>{track === 'service' && <div className="muted small">يُرشَّح هنا موظفو مركز الاتصال (الكول سنتر) والعاملون في منصة «تجاوب».</div>}</div></div>
       {bud && <div className="budbanner"><div><div className="bl">المتاح لتقسيمك في مسار المبادر</div><div className="bv num">{fmt(bud.balance)}<small> ر.ع</small></div></div>
         <div className="bbar"><div className="prog"><i style={{ width: `${Math.min(100, ((bud.allocation - bud.balance) / (bud.allocation || 1)) * 100)}%` }} /></div><div className="small">المستهلك {fmt(bud.allocation - bud.balance)} من {fmt(bud.allocation)} ر.ع</div></div>
         <div className="blim"><Icon n="shield" size={16} />المبلغ للموظف الواحد: من <b className="num">{fmt(ys?.initiator_min ?? 50)}</b> إلى <b className="num">{fmt(ys?.initiator_max ?? 300)}</b> ر.ع</div></div>}

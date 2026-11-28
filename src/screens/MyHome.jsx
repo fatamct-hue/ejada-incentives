@@ -4,6 +4,7 @@ import Icon, { TRACK_ICON } from '../Icon'
 import { CountUp } from '../motion'
 import { useEffect as useEff } from 'react'
 import NomModal from './NomModal'
+import { Ring } from '../ui'
 
 export default function MyHome({ go }) {
   const { me, year, ys, noms, divisions, divName, years } = useApp()
@@ -35,7 +36,7 @@ export default function MyHome({ go }) {
         <td><button className="btn s t" onClick={() => { sessionStorage.setItem('edit', n.id); go(n.track) }}>استكمال</button></td></tr>)}</tbody></table></div></>}
     {bud && <><div className="sec"><h2>مخصص المبادر المتاح لتقسيمك</h2></div>
       <div className="budbanner"><div><div className="bl">المتاح الآن</div><div className="bv num"><CountUp value={fmt(bud.balance)} /><small> ر.ع</small></div></div>
-        <div className="bbar"><div className="prog"><i style={{ width: `${Math.min(100, ((bud.allocation - bud.balance) / (bud.allocation || 1)) * 100)}%` }} /></div><div className="small">المخصص السنوي {fmt(bud.allocation)} ر.ع · المعتمد {fmt(bud.allocation - bud.balance)} ر.ع</div></div>
+        <div className="bbar"><div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><Ring value={bud.allocation - bud.balance} max={bud.allocation || 1} color="#43b987">{Math.round(((bud.allocation - bud.balance) / (bud.allocation || 1)) * 100)}%</Ring><div className="prog" style={{ flex: 1 }}><i style={{ width: `${Math.min(100, ((bud.allocation - bud.balance) / (bud.allocation || 1)) * 100)}%` }} /></div></div><div className="small">المخصص السنوي {fmt(bud.allocation)} ر.ع · المعتمد {fmt(bud.allocation - bud.balance)} ر.ع</div></div>
         <div className="blim"><Icon n="shield" size={16} />مبلغ المبادر للموظف الواحد: من <b className="num">{fmt(ys?.initiator_min ?? 50)}</b> إلى <b className="num">{fmt(ys?.initiator_max ?? 300)}</b> ر.ع</div></div></>}
     <div className="sec"><h2>حصيلة التكريم في {year}</h2></div>
     <div className="honor stg">

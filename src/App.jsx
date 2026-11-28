@@ -43,6 +43,17 @@ class Boundary extends Component {
   }
 }
 
+function Palette({ items, go, onClose }) {
+  const [q, setQ] = useState(''); const [i, setI] = useState(0)
+  const list = items.filter((n) => n[1].includes(q.trim()))
+  const pick = (n) => { go(n[0]); onClose() }
+  return <div className="authov" onClick={onClose}><div className="card pal" onClick={(e) => e.stopPropagation()}>
+    <input autoFocus placeholder="انتقل إلى شاشة…" value={q} onChange={(e) => { setQ(e.target.value); setI(0) }}
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose(); if (e.key === 'ArrowDown') setI((x) => Math.min(x + 1, list.length - 1)); if (e.key === 'ArrowUp') setI((x) => Math.max(x - 1, 0)); if (e.key === 'Enter' && list[i]) pick(list[i]) }} />
+    {list.map((n, k) => <button key={n[0]} className={k === i ? 'on' : ''} onMouseEnter={() => setI(k)} onClick={() => pick(n)}><Icon n={n[3]} size={18} />{n[1]}</button>)}
+    {!list.length && <div className="muted small" style={{ padding: 10 }}>لا نتائج</div>}</div></div>
+}
+
 function ViewAs() {
   const { me, divisions, rpc } = useApp()
   const [busy, setBusy] = useState(false)
@@ -59,7 +70,7 @@ function ViewAs() {
 function Shell() {
   const { me, year, setYear, years, toast, loaded, divisions, requests, noms, say } = useApp()
   const [page, setPage] = useState((location.hash || '#home').slice(1).split('?')[0])
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false); const [pal, setPal] = useState(false)
   useEffect(() => { const h = () => setPage((location.hash || '#home').slice(1).split('?')[0]); addEventListener('hashchange', h); return () => removeEventListener('hashchange', h) }, [])
   const myDiv = divisions.find((d) => d.id === me.division_id)
   const lockedService = me.role === 'dg' && !myDiv?.is_service
@@ -71,10 +82,12 @@ function Shell() {
   const bell = { dg: yrN.filter((n) => n.status === 'needs_info').length, ejada: yrN.filter((n) => n.status === 'to_pay').length + pendReq,
     dev: yrN.filter((n) => n.status === 'review' && n.track !== 'initiator').length, admin_fin: yrN.filter((n) => (n.track === 'initiator' && n.status === 'review') || n.status === 'approved').length }[me.role] || 0
   const bellTo = me.role === 'ejada' ? (pendReq ? 'settings' : 'review') : 'home'
+  useEffect(() => { const h = (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPal((x) => !x) } }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h) }, [])
   useEffect(() => { document.title = `${cur[1]} · منصة حوافز الإجادة المؤسسية` }, [cur[1]])
   const initials = (me.full_name || '؟').trim().split(/\s+/).map((w) => w.replace(/^ال/, '')).filter(Boolean).slice(0, 2).map((w) => w[0]).join('')
   const S = { home: { dg: MyHome, ejada: CommandHome, dev: ApprovalHome, admin_fin: FinanceHome }[me.role], service: Form, initiator: Form, innovator: Innovator, review: Review, budget: Budget, reports: Reports, settings: Settings, criteria: Criteria, employees: Employees, payroll: Payroll }[cur[0]]
   return <div className="app">
+    {pal && <Palette items={nav.filter((n) => !n[4])} go={go} onClose={() => setPal(false)} />}
     {open && <div className="scrim" onClick={() => setOpen(false)} />}
     <aside className={`side ${open ? 'open' : ''}`}>
       <img src={asset('brand/logo-horizontal-white.png')} alt="وزارة الإسكان والتخطيط العمراني" style={{ width: '100%' }} />
@@ -94,6 +107,7 @@ function Shell() {
       <div className="topbar"><button className="btn o s mtop" onClick={() => setOpen(!open)}><Icon n="menu" size={18} /></button>
         <h1><Icon n={cur[3]} size={24} />{cur[1]}</h1>
         <div className="yr">السنة <select value={year} onChange={(e) => setYear(+e.target.value)}>{years.map((y) => <option key={y.year}>{y.year}</option>)}</select></div>
+        <button className="bellbtn" onClick={() => setPal(true)} title="بحث سريع (Ctrl+K)" aria-label="بحث سريع"><Icon n="dash" size={20} /></button>
         <button className="bellbtn" onClick={() => go(bellTo)} title={bell ? `${bell} بانتظارك` : 'لا إجراءات معلّقة'} aria-label="الإشعارات"><Icon n="bell" size={20} />{bell > 0 && <span className="bdot">{bell}</span>}</button>
         <div className="uchip"><span className="uav">{initials}</span><span className="un"><b>{me.full_name}</b><small>{ROLE_META[me.role].title}</small></span></div></div>
       {me.is_super && me.role !== 'ejada' && <div className="vbanner"><Icon n="shield" size={16} />وضع العرض: تُشاهد المنصة الآن كـ <b>{ROLE_META[me.role].title}{me.role === 'dg' ? ' — ' + shortName(divisions.find((d) => d.id === me.division_id)?.name || '') : ''}</b></div>}
